@@ -5,6 +5,8 @@ import { ToastContainer } from "react-toastify";
 import './App.css';
 import "react-toastify/dist/ReactToastify.css";
 import Login from "./Pages/LoginPage/Login";
+import Signup from "./Pages/SignupPage/Signup";
+import Home from "./Pages/HomePage.jsx/Home";
 
 function App() {
   return (
@@ -24,7 +26,9 @@ function App() {
       />
       <Router>
         <Routes>
+          <Route path="/*" element={<Home></Home>} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
         </Routes>
       </Router>
     </Fragment>

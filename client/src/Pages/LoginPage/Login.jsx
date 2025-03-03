@@ -82,7 +82,7 @@ function Login() {
 
           <Typography variant="body2">
             Don't have an account?{" "}
-            <Link to="/Signup/Signup" style={{ color: "#0072ff", textDecoration: "none", fontWeight: "bold" }}>
+            <Link to="/Signup" style={{ color: "#0072ff", textDecoration: "none", fontWeight: "bold" }}>
               Sign up
             </Link>
           </Typography>

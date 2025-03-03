@@ -16,14 +16,13 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['student', 'teacher', 'admin'],
-        default: 'student'
+        enum: ['seller', 'admin'],
+        default: 'seller'
     },
-    course: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'course'
-    }]
-
+    date: {
+        type: Date,
+        default: Date.now
+    }
 })
 
 const userModel = new mongoose.model("user", userSchema)
