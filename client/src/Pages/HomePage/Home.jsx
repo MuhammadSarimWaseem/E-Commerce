@@ -1,10 +1,36 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { Container, Typography, Button, Paper, Box } from "@mui/material";
+import { toast } from "react-toastify";
+import Axios from "axios";
+import Cookies from "js-cookie";
 
 function Home() {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const clearToken = async () => {
+            try {
+                const response = await Axios.get("http://localhost:8000/home", {
+                    headers: { "Content-Type": "application/json" }, withCredentials: true
+                });
+                const { token, message } = response.data;
+
+                // Clear token in cookies
+                if (!token) {
+                    Cookies.remove("token");
+                } else {
+                    toast.info("Token still exists.");
+                }
+            } catch (error) {
+                toast.error("Failed to clear token. Please check your backend.");
+                console.error("Error clearing token:", error);
+            }
+        };
+
+        clearToken();
+    }, []);
 
     return (
         <Box

@@ -2,11 +2,14 @@ import React, { Fragment } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
-import './App.css';
-import "react-toastify/dist/ReactToastify.css";
+import Home from "./Pages/HomePage/Home";
 import Login from "./Pages/LoginPage/Login";
 import Signup from "./Pages/SignupPage/Signup";
-import Home from "./Pages/HomePage.jsx/Home";
+import Navbar from "./Components/Navbar";
+
+import './App.css';
+import "react-toastify/dist/ReactToastify.css";
+
 
 function App() {
   return (
@@ -25,8 +28,9 @@ function App() {
         }}
       />
       <Router>
+        <Navbar></Navbar>
         <Routes>
-          <Route path="/*" element={<Home></Home>} />
+          <Route path="/*" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
         </Routes>

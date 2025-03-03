@@ -1,16 +1,17 @@
-const express = require('express')
-const cookieParser = require('cookie-parser')
-const userModel = require('../Model/user')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const router = express.Router()
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const userModel = require("../Model/user");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-//Middlewares
-router.use(express.urlencoded({ extended: 'false' }))
-router.use(cookieParser())
+const router = express.Router();
 
-router.post('/signup', async (req, res) => {
+// Middlewares
+router.use(express.json());
+router.use(cookieParser());
+
+router.post("/signup", async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
 
@@ -24,38 +25,36 @@ router.post('/signup', async (req, res) => {
         }
 
         if (password.length < 6) {
-            return res.status(400).json({ error: "Password must be at least 6 characters long." })
+            return res.status(400).json({ error: "Password must be at least 6 characters long." });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await userModel.create({ name, email, password: hashedPassword, role });
 
-        const token = jwt.sign({ email: user.email, userid: user._id }, process.env.JWT_SECRET);
-        res.cookie("token", token);
+        // Generate JWT with expiration
+        const token = jwt.sign(
+            { email: user.email, userid: user._id },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" }
+        );
 
-        res.status(201).json({ message: "User created successfully", token: token });
+        // Set Secure HTTP-Only Cookie
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production", // Secure only in production
+            sameSite: "Strict",
+        });
 
-
-        async function main(userEmail) {
-            try {
-                const info = await transporter.sendMail({
-                    from: '"Your Name" <sarimwaseem84@gmail.com>', // Sender address
-                    to: user.email, // Receiver's email address
-                    subject: "Welcome!", // Email subject
-                    text: "Welcome to our platform!", // Plain text body
-                    html: "<b>Welcome to our platform!</b>", // HTML body
-                });
-
-                console.log("Message sent: %s", info.messageId);
-            } catch (error) {
-                console.error("Error sending email:", error);
-            }
-        }
-        main();
+        res.status(201).json({
+            message: "User created successfully",
+            token: token,
+            user: { id: user._id, name: user.name, email: user.email, role: user.role },
+        });
 
     } catch (err) {
+        console.error("Signup error:", err);
         res.status(500).json({ error: "An error occurred while creating the user." });
     }
 });
 
-module.exports = router
+module.exports = router;

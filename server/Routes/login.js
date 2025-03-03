@@ -10,7 +10,7 @@ require("dotenv").config();
 router.use(express.urlencoded({ extended: 'false' }))
 router.use(cookieParser())
 
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -20,24 +20,27 @@ router.post('/login', async (req, res) => {
 
         const user = await userModel.findOne({ email });
         if (!user) {
-            return res.status(401).json({ error: "Email or password is incorrect." });
+            return res.status(401).json({ error: "Invalid email or password." });
         }
 
         const isPasswordCorrect = await bcrypt.compare(password, user.password);
         if (!isPasswordCorrect) {
-            return res.status(401).json({ error: "Email or password is incorrect." });
+            return res.status(401).json({ error: "Invalid email or password." });
         }
 
         const token = jwt.sign(
-            { email: user.email, userid: user._id }, process.env.JWT_SECRET
+            { email: user.email, userid: user._id, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" }
         );
 
-        res.cookie("token", token, { httpOnly: true, secure: false, sameSite: "lax" }); // Secure token in cookie
-        return res.status(200).json({ message: "Login Successful!", token });
+        res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" });
+
+        return res.status(200).json({ message: "Login successful!", token });
     } catch (error) {
-        // console.error("Login Error:", error); 
         return res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
 
 module.exports = router

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Container,
   TextField,
@@ -11,9 +11,52 @@ import {
   Box,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import Axios from "axios";
+import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 
 function Login() {
+  const navigate = useNavigate();
+  const [input, setInput] = useState({ email: "", password: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const InputHandler = (event) => {
+    const { name, value } = event.target;
+    setInput((prevInput) => ({
+      ...prevInput,
+      [name]: value,
+    }));
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const { email, password } = input;
+    try {
+      setIsSubmitting(true); // Disable button during submission
+
+      const { data } = await Axios.post(
+        "http://localhost:8000/login",
+        { email, password },
+        { headers: { "Content-Type": "application/json" }, withCredentials: true }
+      );
+
+      if (data.token) {
+        Cookies.set("token", data.token, { expires: 7 }); // Save token for 7 days
+        toast.success(data.message || "Login successful!");
+        setInput({ email: "", password: "" });
+        navigate("/Home"); // Redirect on success
+      } else if (data.error) {
+        toast.error(data.error);
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error || "Login failed. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false); // Re-enable button
+    }
+  };
 
   return (
     <Box
@@ -39,12 +82,25 @@ function Login() {
             Login
           </Typography>
 
-          <form style={{ width: "100%" }}>
-            <TextField label="Email" fullWidth required variant="outlined" margin="normal" />
+          {/* ✅ Added onSubmit={handleLogin} */}
+          <form style={{ width: "100%" }} onSubmit={handleLogin}>
+            <TextField
+              label="Email"
+              name="email"
+              value={input.email}
+              onChange={InputHandler}
+              fullWidth
+              required
+              variant="outlined"
+              margin="normal"
+            />
 
             <TextField
               label="Password"
+              name="password"
               type={showPassword ? "text" : "password"}
+              value={input.password}
+              onChange={InputHandler}
               fullWidth
               required
               variant="outlined"
@@ -65,6 +121,7 @@ function Login() {
               fullWidth
               variant="contained"
               size="large"
+              disabled={isSubmitting}
               sx={{
                 mt: 3,
                 mb: 2,
@@ -76,7 +133,7 @@ function Login() {
                 },
               }}
             >
-              Log in
+              {isSubmitting ? "Logging in..." : "Log in"}
             </Button>
           </form>
 
