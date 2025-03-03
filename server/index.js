@@ -6,6 +6,8 @@ const loginRoute = require("./Routes/login");
 const signupRoute = require("./Routes/signup");
 const logoutRoute = require("./Routes/logout");
 const homeRoute = require("./Routes/home");
+const userRoleRoute = require("./Routes/userRole");
+const landingRoute = require("./Routes/landing");
 
 const app = express();
 const PORT = 8000;
@@ -23,6 +25,8 @@ app.use("/", loginRoute);
 app.use("/", signupRoute);
 app.use("/", logoutRoute);
 app.use("/", homeRoute);
+app.use("/", userRoleRoute);
+app.use("/", landingRoute);
 
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

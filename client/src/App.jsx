@@ -9,6 +9,7 @@ import Navbar from "./Components/Navbar";
 
 import './App.css';
 import "react-toastify/dist/ReactToastify.css";
+import Landing from "./Pages/LandingPage/Landing";
 
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
           <Route path="/*" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/landing" element={<Landing />} />
         </Routes>
       </Router>
     </Fragment>

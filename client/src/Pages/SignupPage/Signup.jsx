@@ -51,7 +51,7 @@ function Signup() {
 
       toast.success(data.message);
       setInput({ name: "", email: "", password: "", role: "" });
-      navigate("/Home");
+      navigate("/landing");
     } catch (error) {
       const errorMessage = error.response?.data?.error || "Signup failed. Please try again.";
       console.log(errorMessage);

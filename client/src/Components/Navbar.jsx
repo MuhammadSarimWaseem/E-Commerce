@@ -60,25 +60,25 @@ function Navbar() {
                 }}
             >
                 <Toolbar sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <Typography variant="h5" sx={{ color: "#0f3460", fontWeight: "bold" }}>
-                        LEARNIFY
+                    <Typography variant="h5" sx={{ color: "#0072ff", fontWeight: "bold" }}>
+                        SNAPCART
                     </Typography>
 
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                         {!isAuthenticated ? (
                             <>
-                                <Button color="inherit" sx={{ color: "#333", fontWeight: "bold" }} onClick={handleLogin}>
+                                <Button color="inherit" sx={{ color: "#0072ff", fontWeight: "bold" }} onClick={handleLogin}>
                                     Login
                                 </Button>
                                 <Button
                                     onClick={handleSignup}
                                     variant="contained"
                                     sx={{
-                                        backgroundColor: "#0f3460",
+                                        backgroundColor: "linear-gradient(90deg, #00c6ff, #0072ff)",
                                         color: "#fff",
                                         textTransform: "none",
                                         fontWeight: "bold",
-                                        "&:hover": { backgroundColor: "#16213e" },
+                                        "&:hover": { backgroundColor: "linear-gradient(90deg, #00c6ff, #0072ff)" },
                                     }}
                                 >
                                     Sign Up

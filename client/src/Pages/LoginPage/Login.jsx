@@ -45,7 +45,7 @@ function Login() {
         Cookies.set("token", data.token, { expires: 7 }); // Save token for 7 days
         toast.success(data.message || "Login successful!");
         setInput({ email: "", password: "" });
-        navigate("/Home"); // Redirect on success
+        navigate("/landing"); // Redirect on success
       } else if (data.error) {
         toast.error(data.error);
       }
