@@ -104,7 +104,12 @@ function Navbar() {
                                 </IconButton>
                                 <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
                                     <MenuItem onClick={handleClose}>Profile</MenuItem>
-                                    {createCourse ? <MenuItem onClick={handleAddCourse}>Add Course</MenuItem> : null}
+                                    {createCourse && (
+                                        <div>
+                                            <MenuItem >Add Product</MenuItem>
+                                            <MenuItem>Add Seller</MenuItem>
+                                        </div>
+                                    )}
                                 </Menu>
                             </>
                         )}
