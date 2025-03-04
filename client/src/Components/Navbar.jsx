@@ -28,7 +28,7 @@ function Navbar() {
         try {
             await Axios.post("http://localhost:8000/logout", {}, { withCredentials: true });
             setValue(false);
-            setCreateCourse(false)
+            setAddProducts(false)
             navigate("/Home");
         } catch (error) {
             console.error("Logout failed:", error);
@@ -36,10 +36,10 @@ function Navbar() {
     };
 
     const permissionValue = permissionStore((state) => state.permissionValue);
-    const [createCourse, setCreateCourse] = useState(permissionValue)
+    const [AddProducts, setAddProducts] = useState(permissionValue)
 
     useEffect(() => {
-        setCreateCourse(permissionValue)
+        setAddProducts(permissionValue)
     }, [permissionValue]);
 
 
@@ -103,11 +103,13 @@ function Navbar() {
                                     <AccountCircle sx={{ color: "#0f3460" }} />
                                 </IconButton>
                                 <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-                                    <MenuItem onClick={handleClose}>Profile</MenuItem>
-                                    {createCourse && (
+                                    <MenuItem onClick={handleClose} >Add Product</MenuItem>
+                                    <MenuItem onClick={handleClose} >Add Seller</MenuItem>
+                                    <MenuItem onClick={handleClose} >View Seller</MenuItem>
+                                    {AddProducts && (
                                         <div>
-                                            <MenuItem >Add Product</MenuItem>
-                                            <MenuItem>Add Seller</MenuItem>
+                                            <MenuItem >Profile</MenuItem>
+                                            <MenuItem >Add Order</MenuItem>
                                         </div>
                                     )}
                                 </Menu>

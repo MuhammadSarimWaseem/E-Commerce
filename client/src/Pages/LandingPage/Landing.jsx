@@ -35,7 +35,7 @@ function Landing() {
         const fetching = async () => {
             try {
                 const response = await Axios.get("http://localhost:8000/userRole", { withCredentials: true });
-                setPermissionValue(response.data.createCourse);
+                setPermissionValue(response.data.AddProducts);
             } catch (error) {
                 console.error("Error fetching user data:", error);
             }

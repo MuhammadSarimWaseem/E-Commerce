@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 const permissionStore = create((set) => ({
-    createCourse: false,
+    AddProducts: false,
     setPermissionValue: (newValue) => set({ permissionValue: newValue }),
 }));
 
