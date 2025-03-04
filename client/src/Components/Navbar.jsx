@@ -103,13 +103,13 @@ function Navbar() {
                                     <AccountCircle sx={{ color: "#0f3460" }} />
                                 </IconButton>
                                 <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-                                    <MenuItem onClick={handleClose} >Add Product</MenuItem>
-                                    <MenuItem onClick={handleClose} >Add Seller</MenuItem>
-                                    <MenuItem onClick={handleClose} >View Seller</MenuItem>
+                                    <MenuItem >Profile</MenuItem>
+                                    <MenuItem >Add Order</MenuItem>
                                     {AddProducts && (
                                         <div>
-                                            <MenuItem >Profile</MenuItem>
-                                            <MenuItem >Add Order</MenuItem>
+                                            <MenuItem onClick={handleClose} >Add Product</MenuItem>
+                                            <MenuItem onClick={handleClose} >Add Seller</MenuItem>
+                                            <MenuItem onClick={handleClose} >View Seller</MenuItem>
                                         </div>
                                     )}
                                 </Menu>
