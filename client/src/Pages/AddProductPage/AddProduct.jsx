@@ -3,11 +3,11 @@ import { TextField, Button, Container, Typography, Paper, CircularProgress } fro
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import authStore from "../../Store/authStore";
-import permissionStore from "../../Store/permissionStore";
 import Axios from "axios";
 import { toast } from "react-toastify";
+import permissionStore from "../../Store/permission";
 
-function AddCourse() {
+function AddProducts() {
     const navigate = useNavigate();
 
     // Auth Check
@@ -36,7 +36,7 @@ function AddCourse() {
         // Permission Check
         const fetching = async () => {
             try {
-                const response = await Axios.get("http://localhost:8000/userInfo", { withCredentials: true });
+                const response = await Axios.get("http://localhost:8000/userRole", { withCredentials: true });
                 setPermissionValue(response.data.AddProducts);
             } catch (error) {
                 console.error("Error fetching user data:", error);
@@ -59,7 +59,6 @@ function AddCourse() {
         description: "",
         price: "",
         image: null,
-        video: null
     });
 
     const [loading, setLoading] = useState(false);  // Loader state
@@ -83,31 +82,28 @@ function AddCourse() {
         formData.append("description", products.description);
         formData.append("price", products.price);
         formData.append("image", products.image);
-        formData.append("video", products.video);
 
         try {
             const response = await Axios.post("http://localhost:8000/addProducts", formData, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
 
-            setCourse({
+            setProducts({
                 title: "",
                 description: "",
                 price: "",
                 image: null,
-                video: null
             });
 
             // Reset file input fields
             if (imageInputRef.current) imageInputRef.current.value = "";
-            if (videoInputRef.current) videoInputRef.current.value = "";
 
             toast.success(response.data.message || "Course added successfully!");
-            navigate("/Course/Course")
+            // navigate("/Course/Course")
             console.log(response.data);
         } catch (error) {
-            console.error("Error adding course:", error);
-            toast.error("Failed to add course.");
+            console.error("Error adding product:", error);
+            toast.error("Failed to add product.");
         } finally {
             setLoading(false); // Hide loader
         }
@@ -118,7 +114,7 @@ function AddCourse() {
             <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <Paper elevation={5} style={{ padding: 20, marginTop: 20, borderRadius: 10 }}>
                     <Typography variant="h5" gutterBottom style={{ textAlign: "center", fontWeight: "bold" }}>
-                        Add New Course
+                        Add Products
                     </Typography>
                     <motion.form
                         onSubmit={handleSubmit}
@@ -132,7 +128,7 @@ function AddCourse() {
                             fullWidth
                             margin="normal"
                             variant="outlined"
-                            value={course.title}
+                            value={products.title}
                             onChange={handleChange}
                             required
                         />
@@ -144,7 +140,7 @@ function AddCourse() {
                             rows={4}
                             margin="normal"
                             variant="outlined"
-                            value={course.description}
+                            value={products.description}
                             onChange={handleChange}
                             required
                         />
@@ -155,7 +151,7 @@ function AddCourse() {
                             fullWidth
                             margin="normal"
                             variant="outlined"
-                            value={course.price}
+                            value={products.price}
                             onChange={handleChange}
                             required
                         />
@@ -164,15 +160,6 @@ function AddCourse() {
                             type="file"
                             name="image"
                             accept="image/*"
-                            onChange={handleFileChange}
-                            style={{ marginTop: 15, display: "block" }}
-                            required
-                        />
-                        <input
-                            ref={videoInputRef}
-                            type="file"
-                            name="video"
-                            accept="video/*"
                             onChange={handleFileChange}
                             style={{ marginTop: 15, display: "block" }}
                             required
@@ -201,4 +188,4 @@ function AddCourse() {
     );
 }
 
-export default AddCourse;
+export default AddProducts;

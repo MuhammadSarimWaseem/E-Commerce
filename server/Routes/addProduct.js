@@ -30,7 +30,7 @@ const storage = new CloudinaryStorage({
     },
 });
 
-// Configure Multer to accept both image and video
+// Configure Multer to accept image 
 const upload = multer({ storage }).fields([
     { name: "image", maxCount: 1 }
 ]);
@@ -50,14 +50,14 @@ router.post("/addProducts", upload, async (req, res) => {
 
         const image = req.files?.image ? req.files.image[0].path : null;
 
-        const product = await productModel.create({
+        const products = await productModel.create({
             title,
             description,
             price,
             image,
         });
 
-        res.status(201).json({ success: true, product });
+        res.status(201).json({ success: true, products });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

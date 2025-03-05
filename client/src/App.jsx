@@ -10,6 +10,7 @@ import Navbar from "./Components/Navbar";
 import './App.css';
 import "react-toastify/dist/ReactToastify.css";
 import Landing from "./Pages/LandingPage/Landing";
+import AddProducts from "./Pages/AddProductPage/AddProduct";
 
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/landing" element={<Landing />} />
+          <Route path="/addProducts" element={<AddProducts/>}/>
         </Routes>
       </Router>
     </Fragment>
