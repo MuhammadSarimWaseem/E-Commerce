@@ -15,7 +15,7 @@ function AddProducts() {
 
     const [products, setProducts] = useState({
         title: "",
-        description: "",
+        wholesalePrice: "",
         price: "",
         image: null,
         preview: "",
@@ -62,7 +62,7 @@ function AddProducts() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!products.title || !products.description || !products.price || !products.image) {
+        if (!products.title || !products.wholesalePrice || !products.price || !products.image) {
             toast.error("All fields are required.");
             return;
         }
@@ -79,7 +79,7 @@ function AddProducts() {
                 headers: { "Content-Type": "multipart/form-data" }
             });
 
-            setProducts({ title: "", description: "", price: "", image: null, preview: "" });
+            setProducts({ title: "", wholesalePrice: "", price: "", image: null, preview: "" });
             if (imageInputRef.current) imageInputRef.current.value = "";
 
             toast.success(response.data.message || "Product added successfully!");
@@ -101,7 +101,7 @@ function AddProducts() {
                         <Grid container spacing={3}>
                             <Grid item xs={12} md={6}>
                                 <TextField label="Title" name="title" fullWidth variant="outlined" value={products.title} onChange={handleChange} required />
-                                <TextField label="Description" name="description" fullWidth multiline rows={4} variant="outlined" value={products.description} onChange={handleChange} required sx={{ mt: 2 }} />
+                                <TextField label="Wholesale Price" name="wholesalePrice" type="number" fullWidth variant="outlined" value={products.wholesalePrice} onChange={handleChange} required sx={{ mt: 2 }} />
                                 <TextField label="Price" name="price" type="number" fullWidth variant="outlined" value={products.price} onChange={handleChange} required sx={{ mt: 2 }} />
                             </Grid>
                             <Grid item xs={12} md={6}>

@@ -43,8 +43,8 @@ router.use(express.json());
 // Route to create product
 router.post("/addProducts", upload, async (req, res) => {
     try {
-        const { title, description, price } = req.body;
-        if (!title || !description || !price) {
+        const { title, wholesalePrice, price } = req.body;
+        if (!title || !wholesalePrice || !price) {
             return res.status(400).json({ message: "Missing fields" });
         }
 
@@ -52,7 +52,7 @@ router.post("/addProducts", upload, async (req, res) => {
 
         const products = await productModel.create({
             title,
-            description,
+            wholesalePrice,
             price,
             image,
         });

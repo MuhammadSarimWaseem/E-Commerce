@@ -6,8 +6,8 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    description: {
-        type: String,
+    wholesalePrice: {
+        type: Number,
         required: true
     },
     price: {
@@ -18,6 +18,10 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    date: {
+        type: Date,
+        default: Date.now
+    }
 
 })
 
