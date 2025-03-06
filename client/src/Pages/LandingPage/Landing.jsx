@@ -1,51 +1,123 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 import Axios from "axios";
+import { Container, Typography, Grid, Skeleton, Card, CardMedia, CardContent, Box, Button } from "@mui/material";
+import { motion } from "framer-motion";
 import authStore from "../../Store/authStore";
 import permissionStore from "../../Store/permission";
 
 function Landing() {
-    const navigate = useNavigate()
-
+    const navigate = useNavigate();
     const setValue = authStore((state) => state.setValue);
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                const response = await Axios.get("http://localhost:8000/landing", {
-                    headers: { "Content-Type": "application/json" },
-                    withCredentials: true,
-                });
+    const setPermissionValue = permissionStore((state) => state.setPermissionValue);
 
-                if (response.data.user) {
-                    setValue(true)
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [authResponse, roleResponse, productsResponse] = await Promise.allSettled([
+                    Axios.get("http://localhost:8000/landing", { withCredentials: true }),
+                    Axios.get("http://localhost:8000/userRole", { withCredentials: true }),
+                    Axios.get("http://localhost:8000/products")
+                ]);
+
+                if (authResponse.status === "fulfilled" && authResponse.value.data.user) {
+                    setValue(true);
+                } else {
+                    throw new Error("Unauthorized");
+                }
+
+                if (roleResponse.status === "fulfilled") {
+                    setPermissionValue(roleResponse.value.data.AddProducts);
+                }
+
+                if (productsResponse.status === "fulfilled" && Array.isArray(productsResponse.value.data)) {
+                    setProducts(productsResponse.value.data);
+                } else {
+                    console.error("Invalid data format received");
                 }
             } catch (error) {
-                console.error("Auth error:", error);
-                navigate("/login"); // Redirect only to login if user is not authenticated
-                setValue(false)
+                console.error("Error:", error);
+                setValue(false);
+                navigate("/login");
+            } finally {
+                setLoading(false);
             }
         };
 
-        checkAuth();
-    }, [navigate]);
+        fetchData();
+    }, [navigate, setValue, setPermissionValue]);
 
-
-    const setPermissionValue = permissionStore((state) => state.setPermissionValue);
-    useEffect(() => {
-        const fetching = async () => {
-            try {
-                const response = await Axios.get("http://localhost:8000/userRole", { withCredentials: true });
-                setPermissionValue(response.data.AddProducts);
-            } catch (error) {
-                console.error("Error fetching user data:", error);
-            }
-        };
-        fetching();
-    }, []);
     return (
-        <div>
-            <h1>Landing Page</h1>
-        </div>
+        <Fragment>
+            <Container maxWidth="lg" sx={{ mt: 10, pb: 6, backgroundColor: "#f7f7f7", borderRadius: "8px", padding: "20px" }}>
+                <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+                    <Typography
+                        variant="h4"
+                        fontWeight={600}
+                        textAlign="center"
+                        gutterBottom
+                        sx={{
+                            color: "#333",
+                            padding: "10px 20px",
+                        }}
+                    >
+                        Explore Our Premium Products
+                    </Typography>
+                </motion.div>
+
+                {loading ? (
+                    <Grid container spacing={4}>
+                        {Array.from({ length: products.length || 6 }).map((_, index) => (
+                            <Grid item xs={12} sm={6} md={4} key={index}>
+                                <Skeleton variant="rectangular" height={250} sx={{ borderRadius: 2 }} />
+                                <Skeleton variant="text" sx={{ mt: 1, width: "80%" }} />
+                                <Skeleton variant="text" sx={{ width: "60%" }} />
+                            </Grid>
+                        ))}
+                    </Grid>
+                ) : (
+                    <Grid container spacing={4}>
+                        {products.map((course) => (
+                            <Grid item xs={12} sm={6} md={4} key={course._id}>
+                                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 300 }}>
+                                    <Card sx={{ backgroundColor: "#fff", color: "#333", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)", borderRadius: "8px" }}>
+                                        {/* Image wrapped inside a link */}
+                                        <a href={course.image || "https://via.placeholder.com/400"} target="_blank" rel="noopener noreferrer">
+                                            <CardMedia
+                                                component="img"
+                                                height="200"
+                                                image={course.image || "https://via.placeholder.com/400"}
+                                                alt={course.title || "Product Image"}
+                                                sx={{ borderRadius: "8px 8px 0 0" }}
+                                            />
+                                        </a>
+                                        <CardContent>
+                                            <Typography variant="h6" fontWeight={600}>
+                                                {course.title || "Untitled Course"}
+                                            </Typography>
+                                            <Typography variant="body2" color="textSecondary">
+                                                Wholesale Price: <strong>${course.wholesalePrice || "N/A"}</strong>
+                                            </Typography>
+                                            <Typography variant="body2" color="textSecondary">
+                                                Price: <strong>${course.price || "N/A"}</strong>
+                                            </Typography>
+                                            <Typography variant="body2" color="textSecondary">
+                                                Date Added: <strong>
+                                                    {course.date ? new Date(course.date).toLocaleDateString() : "N/A"}
+                                                </strong>
+                                            </Typography>
+                                        </CardContent>
+                                    </Card>
+                                </motion.div>
+                            </Grid>
+                        ))}
+                    </Grid>
+                )}
+            </Container>
+        </Fragment>
     );
 }
 

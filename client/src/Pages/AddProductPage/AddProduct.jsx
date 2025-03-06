@@ -83,6 +83,7 @@ function AddProducts() {
             if (imageInputRef.current) imageInputRef.current.value = "";
 
             toast.success(response.data.message || "Product added successfully!");
+            navigate("/landing");
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to add product.");
         } finally {
@@ -138,7 +139,7 @@ function AddProducts() {
                                 fontWeight: "bold",
                                 "&:hover": { background: "linear-gradient(90deg, #0072ff, #00c6ff)" },
                             }} disabled={loading}>
-                                {loading ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Submit"}
+                                {loading ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Add Product"}
                             </Button>
                         </motion.div>
                     </motion.form>

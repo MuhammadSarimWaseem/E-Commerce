@@ -8,6 +8,7 @@ const logoutRoute = require("./Routes/logout");
 const homeRoute = require("./Routes/home");
 const userRoleRoute = require("./Routes/userRole");
 const landingRoute = require("./Routes/landing");
+const productRoute = require("./Routes/products");
 const addProductRoute = require("./Routes/addProduct");
 
 const app = express();
@@ -28,6 +29,7 @@ app.use("/", logoutRoute);
 app.use("/", homeRoute);
 app.use("/", userRoleRoute);
 app.use("/", landingRoute);
+app.use("/", productRoute);
 app.use("/", addProductRoute);
 
 
