@@ -1,7 +1,10 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 import Axios from "axios";
-import { Container, Typography, Grid, Skeleton, Card, CardMedia, CardContent, Box, Button } from "@mui/material";
+import {
+    Container, Typography, Grid, Skeleton, Card, CardMedia, CardContent,
+    TextField, Button, Box
+} from "@mui/material";
 import { motion } from "framer-motion";
 import authStore from "../../Store/authStore";
 import permissionStore from "../../Store/permission";
@@ -13,6 +16,8 @@ function Landing() {
 
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filter, setFilter] = useState("all");
 
     useEffect(() => {
         const fetchData = async () => {
@@ -50,23 +55,48 @@ function Landing() {
         fetchData();
     }, [navigate, setValue, setPermissionValue]);
 
+    // **Filter logic**
+    const filteredProducts = products
+        .filter((product) => product.title.toLowerCase().includes(searchQuery.toLowerCase())) // Search filter
+        .filter((product) => {
+            if (filter === "recent") {
+                return products.sort((a, b) => new Date(b.date) - new Date(a.date));
+            }
+            if (filter === "last7days") {
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                return new Date(product.date) >= sevenDaysAgo;
+            }
+            return true; // Default: Show all
+        });
+
     return (
         <Fragment>
             <Container maxWidth="lg" sx={{ mt: 10, pb: 6, backgroundColor: "#f7f7f7", borderRadius: "8px", padding: "20px" }}>
                 <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-                    <Typography
-                        variant="h4"
-                        fontWeight={600}
-                        textAlign="center"
-                        gutterBottom
-                        sx={{
-                            color: "#333",
-                            padding: "10px 20px",
-                        }}
-                    >
+                    <Typography variant="h4" fontWeight={600} textAlign="center" gutterBottom sx={{ color: "#333", padding: "10px 20px" }}>
                         Explore Our Premium Products
                     </Typography>
                 </motion.div>
+
+                {/* Search & Filter Section */}
+                <Box display="flex" flexDirection="column" alignItems="center" gap={2} mb={3}>
+                    {/* Search Bar */}
+                    <TextField
+                        label="Search by Product Name"
+                        variant="outlined"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        sx={{ width: "100%", maxWidth: "400px", backgroundColor: "#fff" }}
+                    />
+
+                    {/* Filter Buttons */}
+                    <Box display="flex" gap={2}>
+                        <Button variant={filter === "all" ? "contained" : "outlined"} onClick={() => setFilter("all")}>All Products</Button>
+                        <Button variant={filter === "recent" ? "contained" : "outlined"} onClick={() => setFilter("recent")}>Recent</Button>
+                        <Button variant={filter === "last7days" ? "contained" : "outlined"} onClick={() => setFilter("last7days")}>Last 7 Days</Button>
+                    </Box>
+                </Box>
 
                 {loading ? (
                     <Grid container spacing={4}>
@@ -80,7 +110,7 @@ function Landing() {
                     </Grid>
                 ) : (
                     <Grid container spacing={4}>
-                        {products.map((course) => (
+                        {filteredProducts.map((course) => (
                             <Grid item xs={12} sm={6} md={4} key={course._id}>
                                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 300 }}>
                                     <Card sx={{ backgroundColor: "#fff", color: "#333", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)", borderRadius: "8px" }}>
