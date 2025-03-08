@@ -8,6 +8,7 @@ import {
 import { motion } from "framer-motion";
 import authStore from "../../Store/authStore";
 import permissionStore from "../../Store/permission";
+import { toast } from "react-toastify";
 
 function Landing() {
     const navigate = useNavigate();
@@ -71,6 +72,7 @@ function Landing() {
 
     const addToCart = (item) => {
         setCartItems((prev) => [...prev, item]);
+        toast.success("Item added to cart!");
     };
 
     return (
@@ -126,6 +128,7 @@ function Landing() {
                                         <CardContent>
                                             <Typography variant="h6" fontWeight={600}>{product.title || "Untitled Product"}</Typography>
                                             <Typography variant="body2">Price: <strong>${product.price || "N/A"}</strong></Typography>
+                                            <Typography variant="body2">WholesalePrice: <strong>${product.wholesalePrice || "N/A"}</strong></Typography>
                                             <Typography variant="body2">Date Added: <strong>{product.date ? new Date(product.date).toLocaleDateString() : "N/A"}</strong></Typography>
                                             <Button onClick={() => addToCart(product)} fullWidth
                                                 variant="contained"
