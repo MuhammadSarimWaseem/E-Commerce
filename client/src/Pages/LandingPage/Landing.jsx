@@ -18,6 +18,7 @@ function Landing() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [filter, setFilter] = useState("all");
+    const [cartItems, setCartItems] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -55,20 +56,22 @@ function Landing() {
         fetchData();
     }, [navigate, setValue, setPermissionValue]);
 
-    // **Filter logic**
-    const filteredProducts = products
-        .filter((product) => product.title.toLowerCase().includes(searchQuery.toLowerCase())) // Search filter
-        .filter((product) => {
-            if (filter === "recent") {
-                return products.sort((a, b) => new Date(b.date) - new Date(a.date));
-            }
-            if (filter === "last7days") {
-                const sevenDaysAgo = new Date();
-                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-                return new Date(product.date) >= sevenDaysAgo;
-            }
-            return true; // Default: Show all
-        });
+    // **Filter and Search Logic**
+    let filteredProducts = products.filter((product) =>
+        product.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    if (filter === "recent") {
+        filteredProducts = [...filteredProducts].sort((a, b) => new Date(b.date) - new Date(a.date));
+    } else if (filter === "last7days") {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        filteredProducts = filteredProducts.filter(product => new Date(product.date) >= sevenDaysAgo);
+    }
+
+    const addToCart = (item) => {
+        setCartItems((prev) => [...prev, item]);
+    };
 
     return (
         <Fragment>
@@ -81,7 +84,6 @@ function Landing() {
 
                 {/* Search & Filter Section */}
                 <Box display="flex" flexDirection="column" alignItems="center" gap={2} mb={3}>
-                    {/* Search Bar */}
                     <TextField
                         label="Search by Product Name"
                         variant="outlined"
@@ -89,8 +91,6 @@ function Landing() {
                         onChange={(e) => setSearchQuery(e.target.value)}
                         sx={{ width: "100%", maxWidth: "400px", backgroundColor: "#fff" }}
                     />
-
-                    {/* Filter Buttons */}
                     <Box display="flex" gap={2}>
                         <Button variant={filter === "all" ? "contained" : "outlined"} onClick={() => setFilter("all")}>All Products</Button>
                         <Button variant={filter === "recent" ? "contained" : "outlined"} onClick={() => setFilter("recent")}>Recent</Button>
@@ -100,7 +100,7 @@ function Landing() {
 
                 {loading ? (
                     <Grid container spacing={4}>
-                        {Array.from({ length: products.length || 6 }).map((_, index) => (
+                        {Array.from({ length: 6 }).map((_, index) => (
                             <Grid item xs={12} sm={6} md={4} key={index}>
                                 <Skeleton variant="rectangular" height={250} sx={{ borderRadius: 2 }} />
                                 <Skeleton variant="text" sx={{ mt: 1, width: "80%" }} />
@@ -110,35 +110,32 @@ function Landing() {
                     </Grid>
                 ) : (
                     <Grid container spacing={4}>
-                        {filteredProducts.map((course) => (
-                            <Grid item xs={12} sm={6} md={4} key={course._id}>
+                        {filteredProducts.map((product) => (
+                            <Grid item xs={12} sm={6} md={4} key={product._id}>
                                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 300 }}>
                                     <Card sx={{ backgroundColor: "#fff", color: "#333", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)", borderRadius: "8px" }}>
-                                        {/* Image wrapped inside a link */}
-                                        <a href={course.image || "https://via.placeholder.com/400"} target="_blank" rel="noopener noreferrer">
+                                        <a href={product.image || "https://via.placeholder.com/400"} target="_blank" rel="noopener noreferrer">
                                             <CardMedia
                                                 component="img"
                                                 height="200"
-                                                image={course.image || "https://via.placeholder.com/400"}
-                                                alt={course.title || "Product Image"}
+                                                image={product.image || "https://via.placeholder.com/400"}
+                                                alt={product.title || "Product Image"}
                                                 sx={{ borderRadius: "8px 8px 0 0" }}
                                             />
                                         </a>
                                         <CardContent>
-                                            <Typography variant="h6" fontWeight={600}>
-                                                {course.title || "Untitled Course"}
-                                            </Typography>
-                                            <Typography variant="body2" color="textSecondary">
-                                                Wholesale Price: <strong>${course.wholesalePrice || "N/A"}</strong>
-                                            </Typography>
-                                            <Typography variant="body2" color="textSecondary">
-                                                Price: <strong>${course.price || "N/A"}</strong>
-                                            </Typography>
-                                            <Typography variant="body2" color="textSecondary">
-                                                Date Added: <strong>
-                                                    {course.date ? new Date(course.date).toLocaleDateString() : "N/A"}
-                                                </strong>
-                                            </Typography>
+                                            <Typography variant="h6" fontWeight={600}>{product.title || "Untitled Product"}</Typography>
+                                            <Typography variant="body2">Price: <strong>${product.price || "N/A"}</strong></Typography>
+                                            <Typography variant="body2">Date Added: <strong>{product.date ? new Date(product.date).toLocaleDateString() : "N/A"}</strong></Typography>
+                                            <Button onClick={() => addToCart(product)} fullWidth
+                                                variant="contained"
+                                                size="large"
+                                                sx={{
+                                                    background: "linear-gradient(90deg, #00c6ff, #0072ff)",
+                                                    color: "#fff",
+                                                    fontWeight: "bold",
+                                                    "&:hover": { background: "linear-gradient(90deg, #0072ff, #00c6ff)" },
+                                                }}>Add to Cart</Button>
                                         </CardContent>
                                     </Card>
                                 </motion.div>
