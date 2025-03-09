@@ -76,14 +76,26 @@ function Cart() {
                                 <ListItemText primary={`Total Amount: $${totalAmount.toFixed(2)}`} />
                             </ListItem>
                         </List>
-                        {/* <Box display="flex" justifyContent="space-between" mt={2}>
-                            <Button variant="contained" color="primary" onClick={() => navigate('/Meals/MealCard')}>
-                                Home
+                        <Box display="flex" justifyContent="space-between" mt={2}>
+                            <Button variant="contained" color="primary"
+                                sx={{
+                                    background: "linear-gradient(90deg, #00c6ff, #0072ff)",
+                                    color: "#fff",
+                                    fontWeight: "bold",
+                                    "&:hover": { background: "linear-gradient(90deg, #0072ff, #00c6ff)" },
+                                }} onClick={() => navigate('/landing')}>
+                                Products
                             </Button>
-                            <Button variant="contained" color="secondary" onClick={handleOrder} disabled={cartValue.length === 0}>
+                            <Button variant="contained" color="secondary"
+                                sx={{
+                                    background: "linear-gradient(90deg, #00c6ff, #0072ff)",
+                                    color: "#fff",
+                                    fontWeight: "bold",
+                                    "&:hover": { background: "linear-gradient(90deg, #0072ff, #00c6ff)" },
+                                }} disabled={cartValue.length === 0}>
                                 Order
                             </Button>
-                        </Box> */}
+                        </Box>
                     </CardContent>
                 </Card>
             </Container>
