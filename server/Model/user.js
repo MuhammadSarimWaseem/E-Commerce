@@ -22,7 +22,11 @@ const userSchema = new mongoose.Schema({
     date: {
         type: Date,
         default: Date.now
-    }
+    },
+    products: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "product"
+    }]
 })
 
 const userModel = new mongoose.model("user", userSchema)

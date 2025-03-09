@@ -10,6 +10,7 @@ const userRoleRoute = require("./Routes/userRole");
 const landingRoute = require("./Routes/landing");
 const productRoute = require("./Routes/products");
 const addProductRoute = require("./Routes/addProduct");
+const order = require("./Routes/order");
 
 const app = express();
 const PORT = 8000;
@@ -31,6 +32,7 @@ app.use("/", userRoleRoute);
 app.use("/", landingRoute);
 app.use("/", productRoute);
 app.use("/", addProductRoute);
+app.use("/", order);
 
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

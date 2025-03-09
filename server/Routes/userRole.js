@@ -19,6 +19,7 @@ router.get('/userRole', async (req, res) => {
 
         if (!user) return res.status(401).json({ error: "User not found" });
         if (user.role === "admin") return res.json({ AddProducts: true });
+        if (user.role === "seller") return res.json({ AddProducts: false });
 
     } catch (error) {
         return res.status(500).json({ error: "Internal Server Error" });

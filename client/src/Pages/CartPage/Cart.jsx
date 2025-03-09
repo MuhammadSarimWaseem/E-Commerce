@@ -5,12 +5,45 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Container, Typography, Card, CardContent, Box, Button, IconButton, Grid, Avatar } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import cartStore from '../../Store/cartStore';
+import Axios from 'axios';
+import Cookies from 'js-cookie';
+import authStore from '../../Store/authStore';
+import permissionStore from '../../Store/permission';
 
 function Cart() {
     const cartValue = cartStore((state) => state.cartValue) || [];
     const setCartValue = cartStore((state) => state.setCartValue);
     const [totalAmount, setTotalAmount] = useState(0);
     const navigate = useNavigate();
+
+
+    const setValue = authStore((state) => state.setValue);
+    const setPermissionValue = permissionStore((state) => state.setPermissionValue);
+    
+    useEffect(() => {
+        const authenticateUser = async () => {
+            try {
+                const [authResponse, roleResponse] = await Promise.all([
+                    Axios.get("http://localhost:8000/landing", { withCredentials: true }),
+                    Axios.get("http://localhost:8000/userRole", { withCredentials: true })
+                ]);
+
+                if (!authResponse.data.user) throw new Error("Unauthorized");
+
+                setValue(true);
+                setPermissionValue(roleResponse.data.AddProducts);
+            } catch (error) {
+                setValue(false);
+                navigate("/login");
+            }
+        };
+
+        authenticateUser();
+    }, [navigate, setValue, setPermissionValue]);
+
+
+
+
 
     useEffect(() => {
         const total = cartValue.reduce((acc, item) => acc + (item.price || 0), 0);
@@ -23,29 +56,36 @@ function Cart() {
         toast.info("Item removed from cart", { theme: "dark" });
     };
 
-    // const handleOrder = async () => {
-    //     if (cartValue.length === 0) {
-    //         toast.warn("Cart is empty!", { theme: "dark" });
-    //         return;
-    //     }
+    const handleOrder = async () => {
+        if (cartValue.length === 0) {
+            toast.warn("Cart is empty!", { theme: "dark" });
+            return;
+        }
 
-    //     try {
-    //         const response = await fetch(process.env.REACT_APP_FIREBASE_CART_DATABASE_URL, {
-    //             method: "POST",
-    //             headers: { "Content-Type": "application/json" },
-    //             body: JSON.stringify({ cartValue: cartValue }),
-    //         });
+        try {
+            const response = await Axios.post(
+                "http://localhost:8000/order", cartValue, {
+                withCredentials: true, // Important for sending cookies
+                headers: {
+                    "Content-Type": "application/json"
+                },
+            }
+            );
 
-    //         if (response.ok) {
-    //             setCartValue([]);
-    //             toast.success("Order placed successfully!", { theme: "dark" });
-    //         } else {
-    //             throw new Error("Failed to place order");
-    //         }
-    //     } catch (error) {
-    //         toast.error(error.message, { theme: "dark" });
-    //     }
-    // };
+            console.log("Response:", response);
+
+            if (response.status === 201) {
+                setCartValue([]); // Clear cart
+                toast.success("Order placed successfully!", { theme: "dark" });
+            } else {
+                throw new Error("Unexpected response status");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            toast.error(error.response?.data?.error || "Failed to place order", { theme: "dark" });
+        }
+    };
+
 
     return (
         <Fragment>
@@ -62,7 +102,10 @@ function Cart() {
                                     <CardContent sx={{ flexGrow: 1 }}>
                                         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{item.title}</Typography>
                                         <Typography variant="body1" color="text.secondary">Price: ${item.price.toFixed(2)}</Typography>
-                                        <Typography variant="body2" color="text.secondary">Wholesale Price: ${item.wholesalrPrice?.toFixed(2)}</Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Wholesale Price: ${item.wholesalePrice?.toFixed(2)}
+                                        </Typography>
+
                                     </CardContent>
                                     <IconButton color="error" onClick={() => handleDelete(index)}>
                                         <DeleteIcon />
@@ -96,6 +139,7 @@ function Cart() {
                         Products
                     </Button>
                     <Button
+                        onClick={handleOrder}
                         variant="contained"
                         sx={{
                             background: "linear-gradient(90deg, #ff7e5f, #ff4b2b)",

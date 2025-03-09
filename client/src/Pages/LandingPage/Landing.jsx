@@ -15,7 +15,6 @@ function Landing() {
     const navigate = useNavigate();
     const setValue = authStore((state) => state.setValue);
     const setPermissionValue = permissionStore((state) => state.setPermissionValue);
-    const setCartValue = cartStore((state) => state.setCartValue);
     const addToCart = cartStore((state) => state.addToCart);
 
     const [products, setProducts] = useState([]);
