@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment } from "react";
+import React, { useEffect, useState, Fragment, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Axios from "axios";
 import {
@@ -9,53 +9,55 @@ import { motion } from "framer-motion";
 import authStore from "../../Store/authStore";
 import permissionStore from "../../Store/permission";
 import { toast } from "react-toastify";
+import cartStore from "../../Store/cartStore";
 
 function Landing() {
     const navigate = useNavigate();
     const setValue = authStore((state) => state.setValue);
     const setPermissionValue = permissionStore((state) => state.setPermissionValue);
+    const setCartValue = cartStore((state) => state.setCartValue);
+    const addToCart = cartStore((state) => state.addToCart);
 
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [filter, setFilter] = useState("all");
-    const [cartItems, setCartItems] = useState([]);
+
+    const fetchData = useCallback(async () => {
+        try {
+            const [authResponse, roleResponse, productsResponse] = await Promise.allSettled([
+                Axios.get("http://localhost:8000/landing", { withCredentials: true }),
+                Axios.get("http://localhost:8000/userRole", { withCredentials: true }),
+                Axios.get("http://localhost:8000/products")
+            ]);
+
+            if (authResponse.status === "fulfilled" && authResponse.value.data.user) {
+                setValue(true);
+            } else {
+                throw new Error("Unauthorized");
+            }
+
+            if (roleResponse.status === "fulfilled") {
+                setPermissionValue(roleResponse.value.data.AddProducts);
+            }
+
+            if (productsResponse.status === "fulfilled" && Array.isArray(productsResponse.value.data)) {
+                setProducts(productsResponse.value.data);
+            } else {
+                console.error("Invalid data format received");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            setValue(false);
+            navigate("/login");
+        } finally {
+            setLoading(false);
+        }
+    }, [navigate, setValue, setPermissionValue]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [authResponse, roleResponse, productsResponse] = await Promise.allSettled([
-                    Axios.get("http://localhost:8000/landing", { withCredentials: true }),
-                    Axios.get("http://localhost:8000/userRole", { withCredentials: true }),
-                    Axios.get("http://localhost:8000/products")
-                ]);
-
-                if (authResponse.status === "fulfilled" && authResponse.value.data.user) {
-                    setValue(true);
-                } else {
-                    throw new Error("Unauthorized");
-                }
-
-                if (roleResponse.status === "fulfilled") {
-                    setPermissionValue(roleResponse.value.data.AddProducts);
-                }
-
-                if (productsResponse.status === "fulfilled" && Array.isArray(productsResponse.value.data)) {
-                    setProducts(productsResponse.value.data);
-                } else {
-                    console.error("Invalid data format received");
-                }
-            } catch (error) {
-                console.error("Error:", error);
-                setValue(false);
-                navigate("/login");
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchData();
-    }, [navigate, setValue, setPermissionValue]);
+    }, [fetchData]);
 
     // **Filter and Search Logic**
     let filteredProducts = products.filter((product) =>
@@ -70,10 +72,12 @@ function Landing() {
         filteredProducts = filteredProducts.filter(product => new Date(product.date) >= sevenDaysAgo);
     }
 
-    const addToCart = (item) => {
-        setCartItems((prev) => [...prev, item]);
+    const handleAddToCart = (item) => {
+        addToCart(item);
+        console.log(item);
         toast.success("Item added to cart!");
     };
+    
 
     return (
         <Fragment>
@@ -116,11 +120,11 @@ function Landing() {
                             <Grid item xs={12} sm={6} md={4} key={product._id}>
                                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 300 }}>
                                     <Card sx={{ backgroundColor: "#fff", color: "#333", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)", borderRadius: "8px" }}>
-                                        <a href={product.image || "https://via.placeholder.com/400"} target="_blank" rel="noopener noreferrer">
+                                        <a href={product.image || "/default-product.jpg"} target="_blank" rel="noopener noreferrer">
                                             <CardMedia
                                                 component="img"
                                                 height="200"
-                                                image={product.image || "https://via.placeholder.com/400"}
+                                                image={product.image || "/default-product.jpg"}
                                                 alt={product.title || "Product Image"}
                                                 sx={{ borderRadius: "8px 8px 0 0" }}
                                             />
@@ -130,7 +134,8 @@ function Landing() {
                                             <Typography variant="body2">Price: <strong>${product.price || "N/A"}</strong></Typography>
                                             <Typography variant="body2">WholesalePrice: <strong>${product.wholesalePrice || "N/A"}</strong></Typography>
                                             <Typography variant="body2">Date Added: <strong>{product.date ? new Date(product.date).toLocaleDateString() : "N/A"}</strong></Typography>
-                                            <Button onClick={() => addToCart(product)} fullWidth
+                                            <Button onClick={() => handleAddToCart(product)}
+                                                fullWidth
                                                 variant="contained"
                                                 size="large"
                                                 sx={{
@@ -138,7 +143,8 @@ function Landing() {
                                                     color: "#fff",
                                                     fontWeight: "bold",
                                                     "&:hover": { background: "linear-gradient(90deg, #0072ff, #00c6ff)" },
-                                                }}>Add to Cart</Button>
+                                                }}
+                                            >Add to Cart</Button>
                                         </CardContent>
                                     </Card>
                                 </motion.div>

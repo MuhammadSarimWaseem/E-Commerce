@@ -110,7 +110,7 @@ function Navbar() {
                                             <MenuItem  onClick={() => navigate("/addProducts")}>Add Product</MenuItem>
                                             <MenuItem onClick={handleClose} >Add Seller</MenuItem>
                                             <MenuItem onClick={handleClose} >View Seller</MenuItem>
-                                            <MenuItem onClick={handleClose} >Cart</MenuItem>
+                                            <MenuItem onClick={() => navigate("/cart")} >Cart</MenuItem>
                                         </div>
                                     )}
                                 </Menu>
