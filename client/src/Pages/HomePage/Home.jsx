@@ -15,11 +15,12 @@ function Home() {
                 const response = await Axios.get("http://localhost:8000/home", {
                     headers: { "Content-Type": "application/json" }, withCredentials: true
                 });
-                const { token, message } = response.data;
+                const { token } = response.data;
 
                 // Clear token in cookies
                 if (!token) {
                     Cookies.remove("token");
+                    toast.info("Token cleared.");
                 } else {
                     toast.info("Token still exists.");
                 }
