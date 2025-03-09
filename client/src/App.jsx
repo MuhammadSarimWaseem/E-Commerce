@@ -20,7 +20,7 @@ function App() {
       {/* Toast Notifications for Global Use */}
       <ToastContainer
         position="top-right"
-        autoClose={3000}
+        autoClose={500}
         hideProgressBar={false}
         theme="light"
         style={{

@@ -2,14 +2,13 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Container, Typography, List, ListItem, ListItemText, Button, IconButton, Card, CardContent, Box } from '@mui/material';
+import { Container, Typography, Card, CardContent, Box, Button, IconButton, Grid, Avatar } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import cartStore from '../../Store/cartStore';
 
 function Cart() {
     const cartValue = cartStore((state) => state.cartValue) || [];
     const setCartValue = cartStore((state) => state.setCartValue);
-
     const [totalAmount, setTotalAmount] = useState(0);
     const navigate = useNavigate();
 
@@ -50,54 +49,66 @@ function Cart() {
 
     return (
         <Fragment>
-            <Container maxWidth="sm">
-                <Card sx={{ mt: 4, p: 2, boxShadow: 3 }}>
-                    <CardContent>
-                        <Typography variant="h5" align="center" gutterBottom>
-                            Cart Items
-                        </Typography>
-                        <List>
-                            {cartValue.length > 0 ? (
-                                cartValue.map((item, index) => (
-                                    <ListItem key={index} secondaryAction={
-                                        <IconButton edge="end" color="error" onClick={() => handleDelete(index)}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    }>
-                                        <ListItemText primary={`${item.title} - $${item.price}`} />
-                                    </ListItem>
-                                ))
-                            ) : (
-                                <Typography variant="body1" align="center" sx={{ mt: 2 }}>
-                                    Your cart is empty!
-                                </Typography>
-                            )}
-                            <ListItem>
-                                <ListItemText primary={`Total Amount: $${totalAmount.toFixed(2)}`} />
-                            </ListItem>
-                        </List>
-                        <Box display="flex" justifyContent="space-between" mt={2}>
-                            <Button variant="contained" color="primary"
-                                sx={{
-                                    background: "linear-gradient(90deg, #00c6ff, #0072ff)",
-                                    color: "#fff",
-                                    fontWeight: "bold",
-                                    "&:hover": { background: "linear-gradient(90deg, #0072ff, #00c6ff)" },
-                                }} onClick={() => navigate('/landing')}>
-                                Products
-                            </Button>
-                            <Button variant="contained" color="secondary"
-                                sx={{
-                                    background: "linear-gradient(90deg, #00c6ff, #0072ff)",
-                                    color: "#fff",
-                                    fontWeight: "bold",
-                                    "&:hover": { background: "linear-gradient(90deg, #0072ff, #00c6ff)" },
-                                }} disabled={cartValue.length === 0}>
-                                Order
-                            </Button>
-                        </Box>
-                    </CardContent>
-                </Card>
+            <Container maxWidth="md">
+                <Typography variant="h4" align="center" gutterBottom sx={{ mt: 4, fontWeight: 'bold', color: '#0072ff' }}>
+                    Your Cart
+                </Typography>
+                {cartValue.length > 0 ? (
+                    <Grid container spacing={2}>
+                        {cartValue.map((item, index) => (
+                            <Grid item xs={12} key={index}>
+                                <Card sx={{ display: 'flex', alignItems: 'center', p: 2, boxShadow: 3 }}>
+                                    <Avatar src={item.image} alt={item.title} sx={{ width: 80, height: 80, mr: 2 }} />
+                                    <CardContent sx={{ flexGrow: 1 }}>
+                                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{item.title}</Typography>
+                                        <Typography variant="body1" color="text.secondary">Price: ${item.price.toFixed(2)}</Typography>
+                                        <Typography variant="body2" color="text.secondary">Wholesale Price: ${item.wholesalrPrice?.toFixed(2)}</Typography>
+                                    </CardContent>
+                                    <IconButton color="error" onClick={() => handleDelete(index)}>
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </Card>
+                            </Grid>
+                        ))}
+                    </Grid>
+                ) : (
+                    <Typography variant="h6" align="center" sx={{ mt: 4, color: '#888' }}>
+                        Your cart is empty! 🛒
+                    </Typography>
+                )}
+                {cartValue.length > 0 && (
+                    <Typography variant="h5" align="center" sx={{ mt: 3, fontWeight: 'bold' }}>
+                        Total Amount: ${totalAmount.toFixed(2)}
+                    </Typography>
+                )}
+                <Box display="flex" justifyContent="center" mt={3} gap={2}>
+                    <Button
+                        variant="contained"
+                        sx={{
+                            background: "linear-gradient(90deg, #00c6ff, #0072ff)",
+                            color: "#fff",
+                            fontWeight: "bold",
+                            px: 4,
+                            '&:hover': { background: "linear-gradient(90deg, #0072ff, #00c6ff)" }
+                        }}
+                        onClick={() => navigate('/landing')}
+                    >
+                        Products
+                    </Button>
+                    <Button
+                        variant="contained"
+                        sx={{
+                            background: "linear-gradient(90deg, #ff7e5f, #ff4b2b)",
+                            color: "#fff",
+                            fontWeight: "bold",
+                            px: 4,
+                            '&:hover': { background: "linear-gradient(90deg, #ff4b2b, #ff7e5f)" }
+                        }}
+                        disabled={cartValue.length === 0}
+                    >
+                        Order
+                    </Button>
+                </Box>
             </Container>
         </Fragment>
     );
