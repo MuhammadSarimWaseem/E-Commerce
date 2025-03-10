@@ -34,5 +34,4 @@ app.use("/", productRoute);
 app.use("/", addProductRoute);
 app.use("/", order);
 
-
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
