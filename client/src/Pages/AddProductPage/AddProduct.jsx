@@ -27,8 +27,8 @@ function AddProducts() {
         const authenticateUser = async () => {
             try {
                 const [authResponse, roleResponse] = await Promise.all([
-                    Axios.get("http://localhost:8000/landing", { withCredentials: true }),
-                    Axios.get("http://localhost:8000/userRole", { withCredentials: true })
+                    Axios.get(`${import.meta.env.VITE_BASE_URL}/landing`, { withCredentials: true }),
+                    Axios.get(`${import.meta.env.VITE_BASE_URL}/userRole`, { withCredentials: true })
                 ]);
 
                 if (!authResponse.data.user) throw new Error("Unauthorized");
@@ -75,7 +75,7 @@ function AddProducts() {
         });
 
         try {
-            const response = await Axios.post("http://localhost:8000/addProducts", formData, {
+            const response = await Axios.post(`${import.meta.env.VITE_BASE_URL}/addProducts`, formData, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
 

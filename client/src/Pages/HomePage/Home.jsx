@@ -12,7 +12,7 @@ function Home() {
     useEffect(() => {
         const clearToken = async () => {
             try {
-                const response = await Axios.get("http://localhost:8000/home", {
+                const response = await Axios.get(`${import.meta.env.VITE_BASE_URL}/home`, {
                     headers: { "Content-Type": "application/json" }, withCredentials: true
                 });
                 const { token } = response.data;

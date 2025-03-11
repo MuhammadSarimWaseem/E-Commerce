@@ -25,9 +25,9 @@ function Landing() {
     const fetchData = useCallback(async () => {
         try {
             const [authResponse, roleResponse, productsResponse] = await Promise.allSettled([
-                Axios.get("http://localhost:8000/landing", { withCredentials: true }),
-                Axios.get("http://localhost:8000/userRole", { withCredentials: true }),
-                Axios.get("http://localhost:8000/products")
+                Axios.get(`${import.meta.env.VITE_BASE_URL}/landing`, { withCredentials: true }),
+                Axios.get(`${import.meta.env.VITE_BASE_URL}/userRole`, { withCredentials: true }),
+                Axios.get(`${import.meta.env.VITE_BASE_URL}/products`)
             ]);
 
             if (authResponse.status === "fulfilled" && authResponse.value.data.user) {
@@ -76,7 +76,6 @@ function Landing() {
         console.log(item);
         toast.success("Item added to cart!");
     };
-    
 
     return (
         <Fragment>

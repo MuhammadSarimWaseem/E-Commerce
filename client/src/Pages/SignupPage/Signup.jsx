@@ -40,7 +40,7 @@ function Signup() {
 
     try {
       setIsSubmitting(true);
-      const { data } = await Axios.post("http://localhost:8000/signup", input, {
+      const { data } = await Axios.post(`${import.meta.env.VITE_BASE_URL}/signup`, input, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });

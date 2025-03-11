@@ -19,13 +19,13 @@ function Cart() {
 
     const setValue = authStore((state) => state.setValue);
     const setPermissionValue = permissionStore((state) => state.setPermissionValue);
-    
+
     useEffect(() => {
         const authenticateUser = async () => {
             try {
                 const [authResponse, roleResponse] = await Promise.all([
-                    Axios.get("http://localhost:8000/landing", { withCredentials: true }),
-                    Axios.get("http://localhost:8000/userRole", { withCredentials: true })
+                    Axios.get(`${import.meta.env.VITE_BASE_URL}/landing`, { withCredentials: true }),
+                    Axios.get(`${import.meta.env.VITE_BASE_URL}/userRole`, { withCredentials: true })
                 ]);
 
                 if (!authResponse.data.user) throw new Error("Unauthorized");
@@ -63,14 +63,12 @@ function Cart() {
         }
 
         try {
-            const response = await Axios.post(
-                "http://localhost:8000/order", cartValue, {
+            const response = await Axios.post(`${import.meta.env.VITE_BASE_URL}/order`, cartValue, {
                 withCredentials: true, // Important for sending cookies
                 headers: {
                     "Content-Type": "application/json"
                 },
-            }
-            );
+            });
 
             console.log("Response:", response);
 

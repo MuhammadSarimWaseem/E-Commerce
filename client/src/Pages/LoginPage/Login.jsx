@@ -36,7 +36,7 @@ function Login() {
       setIsSubmitting(true); // Disable button during submission
 
       const { data } = await Axios.post(
-        "http://localhost:8000/login",
+        `${import.meta.env.VITE_BASE_URL}/login`,
         { email, password },
         { headers: { "Content-Type": "application/json" }, withCredentials: true }
       );

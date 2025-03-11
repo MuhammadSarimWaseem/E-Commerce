@@ -26,7 +26,7 @@ function Navbar() {
 
     const handleLogout = async () => {
         try {
-            await Axios.post("http://localhost:8000/logout", {}, { withCredentials: true });
+            await Axios.post(`${import.meta.env.VITE_BASE_URL}/logout`, {}, { withCredentials: true });
             setValue(false);
             setAddProducts(false)
             navigate("/Home");
@@ -41,11 +41,6 @@ function Navbar() {
     useEffect(() => {
         setAddProducts(permissionValue)
     }, [permissionValue]);
-
-
-    const handleAddCourse = (() => {
-        // navigate("/AddCourse/AddCourse")
-    })
 
     return (
         <Box sx={{ flexGrow: 1 }}>
