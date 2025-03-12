@@ -13,6 +13,7 @@ import Landing from "./Pages/LandingPage/Landing";
 import AddProducts from "./Pages/AddProductPage/AddProduct";
 import Cart from "./Pages/CartPage/Cart";
 import Orders from "./Pages/ViewOrdersPage/ViewOrder";
+import AddSeller from "./Pages/AddSellerPage/AddSeller";
 
 
 function App() {
@@ -40,7 +41,8 @@ function App() {
           <Route path="/landing" element={<Landing />} />
           <Route path="/addProducts" element={<AddProducts/>}/>
           <Route path="/cart" element={<Cart/>}/>
-          <Route path="/Orders" element={<Orders/>}/>
+          <Route path="/orders" element={<Orders/>}/>
+          <Route path="/addSeller" element={<AddSeller/>}/>
         </Routes>
       </Router>
     </Fragment>

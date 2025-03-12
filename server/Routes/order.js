@@ -40,10 +40,6 @@ router.post("/order", isloggedIn, async (req, res) => {
         // Fetch all products in a single query
         let products = await productModel.find({ _id: { $in: productIds } });
 
-        if (products.length !== cartValue.length) {
-            return res.status(400).send({ error: "Some products were not found!" });
-        }
-
         let orderItems = cartValue.map(item => {
             let product = products.find(p => p._id.toString() === item._id);
             return {
