@@ -2,7 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken"); 
 const userModel = require("../Model/user");
 const productModel = require("../Model/product");
-const orderModel = require("../Model/order");  // Import Order Model
+const orderModel = require("../Model/order");  
 const cookieParser = require("cookie-parser");
 
 const router = express.Router();
@@ -14,39 +14,54 @@ router.post("/order", isloggedIn, async (req, res) => {
     try {
         console.log("Request Body:", req.body); // Debugging
 
+        // Validate shipping details
+        if (!req.body.shippingDetails || 
+            !req.body.shippingDetails.customerName || 
+            !req.body.shippingDetails.contactDetails || 
+            !req.body.shippingDetails.shippingAddress) {
+            return res.status(400).send({ error: "Shipping details are required!" });
+        }
+
+        // Fetch User
         let user = await userModel.findOne({ email: req.user.email });
         if (!user) {
             return res.status(404).send({ error: "User not found" });
         }
 
-        let cartValue = req.body.cartValue || req.body;
+        let cartValue = req.body.cart || [];
 
+        // Validate cart
         if (!Array.isArray(cartValue) || cartValue.length === 0) {
-            return res.status(400).send({ error: "Invalid cart data", receivedData: req.body });
+            return res.status(400).send({ error: "Cart is empty or invalid!", receivedData: req.body });
         }
 
-        let orderItems = [];
+        let productIds = cartValue.map(item => item._id);
+        
+        // Fetch all products in a single query
+        let products = await productModel.find({ _id: { $in: productIds } });
 
-        for (let item of cartValue) {
-            let existingProduct = await productModel.findById(item._id);
-            
-            if (!existingProduct) {
-                return res.status(400).send({ error: `Product not found: ${item.title}` });
-            }
-
-            orderItems.push({
-                product: existingProduct._id,
-                quantity: item.quantity || 1 // Default quantity = 1
-            });
+        if (products.length !== cartValue.length) {
+            return res.status(400).send({ error: "Some products were not found!" });
         }
+
+        let orderItems = cartValue.map(item => {
+            let product = products.find(p => p._id.toString() === item._id);
+            return {
+                product: product._id,
+                quantity: item.quantity || 1
+            };
+        });
 
         // Save order
         let order = await orderModel.create({
             user: user._id,
-            products: orderItems
+            products: orderItems,
+            customerName: req.body.shippingDetails.customerName,
+            contactDetails: req.body.shippingDetails.contactDetails,
+            shippingAddress: req.body.shippingDetails.shippingAddress
         });
 
-        res.status(201).send({ message: "Order placed successfully", order });
+        res.status(201).send({ message: "Order placed successfully!", order });
     } catch (err) {
         console.error(err);
         res.status(500).send({ error: "Error creating order" });
