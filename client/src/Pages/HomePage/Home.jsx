@@ -20,7 +20,6 @@ function Home() {
                 // Clear token in cookies
                 if (!token) {
                     Cookies.remove("token");
-                    toast.info("Token cleared.");
                 } else {
                     toast.info("Token still exists.");
                 }
