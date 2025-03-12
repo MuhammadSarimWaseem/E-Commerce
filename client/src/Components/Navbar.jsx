@@ -100,6 +100,7 @@ function Navbar() {
                                 <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
                                     <MenuItem >Add Order</MenuItem>
                                     <MenuItem onClick={() => navigate("/cart")} >Cart</MenuItem>
+                                    <MenuItem onClick={() => navigate("/landing")} >Products</MenuItem>
                                     {AddProducts && (
                                         <div>
                                             <MenuItem onClick={() => navigate("/addProducts")}>Add Product</MenuItem>
