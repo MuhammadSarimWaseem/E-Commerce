@@ -11,6 +11,7 @@ const landingRoute = require("./Routes/landing");
 const productRoute = require("./Routes/products");
 const addProductRoute = require("./Routes/addProduct");
 const order = require("./Routes/order");
+const viewOrders = require("./Routes/viewOrders");
 
 const app = express();
 const PORT = 8000;
@@ -33,5 +34,6 @@ app.use("/", landingRoute);
 app.use("/", productRoute);
 app.use("/", addProductRoute);
 app.use("/", order);
+app.use("/", viewOrders);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

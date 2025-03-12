@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Landing from "./Pages/LandingPage/Landing";
 import AddProducts from "./Pages/AddProductPage/AddProduct";
 import Cart from "./Pages/CartPage/Cart";
+import Orders from "./Pages/ViewOrdersPage/ViewOrder";
 
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
           <Route path="/landing" element={<Landing />} />
           <Route path="/addProducts" element={<AddProducts/>}/>
           <Route path="/cart" element={<Cart/>}/>
+          <Route path="/Orders" element={<Orders/>}/>
         </Routes>
       </Router>
     </Fragment>

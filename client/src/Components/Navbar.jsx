@@ -101,6 +101,7 @@ function Navbar() {
                                     <MenuItem >Add Order</MenuItem>
                                     <MenuItem onClick={() => navigate("/cart")} >Cart</MenuItem>
                                     <MenuItem onClick={() => navigate("/landing")} >Products</MenuItem>
+                                    <MenuItem onClick={() => navigate("/Orders")} >Order</MenuItem>
                                     {AddProducts && (
                                         <div>
                                             <MenuItem onClick={() => navigate("/addProducts")}>Add Product</MenuItem>
