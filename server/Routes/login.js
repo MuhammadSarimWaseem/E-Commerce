@@ -33,14 +33,15 @@ router.post("/login", async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: "7d" }
         );
+        console.log("Token sent in cookie:", token);
+        console.log("Cookies after login:", req.cookies);
 
-        res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" });
-
+        res.cookie("token", token, {path: "/", httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "None" });
+        
         return res.status(200).json({ message: "Login successful!", token });
     } catch (error) {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
 
 module.exports = router

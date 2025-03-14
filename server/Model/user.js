@@ -23,9 +23,9 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    products: [{
+    orders: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "product"
+        ref: "order"
     }]
 })
 
