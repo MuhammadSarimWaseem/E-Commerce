@@ -5,14 +5,37 @@ const sellerSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    address: {
-        type: String,
-        required: true,
-        unique: true
+    contactDetails: {
+        phone: {
+            type: String,
+            required: true
+        },
+        email: {
+            type: String,
+            required: false
+        }
     },
-    contact_no: {
-        type: Number,
-        required: true
+    shippingAddress: {
+        street1: {
+            type: String,
+            required: true
+        },
+        street2: {
+            type: String,
+            required: false
+        },
+        city: {
+            type: String,
+            required: true
+        },
+        country: {
+            type: String,
+            required: true
+        },
+        zipCode: {
+            type: String,
+            required: true
+        }
     },
     date: {
         type: Date,

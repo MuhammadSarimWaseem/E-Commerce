@@ -140,6 +140,7 @@ function Landing() {
                                         <CardContent>
                                             <Typography variant="h6" fontWeight={600}>{product.title || "Untitled Product"}</Typography>
                                             <Typography variant="body2">Price: <strong>${product.price || "N/A"}</strong></Typography>
+                                            <Typography variant="body2">WholesalePrice: <strong>${product.wholesalePrice || "N/A"}</strong></Typography>
                                             <Button onClick={() => handleAddToCart(product)}
                                                 fullWidth
                                                 variant="contained"

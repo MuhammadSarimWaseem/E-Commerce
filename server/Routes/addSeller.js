@@ -11,29 +11,38 @@ router.use(cookieParser());
 
 router.post("/addSeller", async (req, res) => {
     try {
-        const { name, address, contact_no } = req.body;
+        const { name, contactDetails, shippingAddress } = req.body;
 
-        if (!name || !address || !contact_no) {
-            return res.status(400).json({ error: "All fields are required." });
+        if (!name || !contactDetails?.phone || !shippingAddress?.street1 || !shippingAddress?.city || !shippingAddress?.country || !shippingAddress?.zipCode) {
+            return res.status(400).json({ error: "All required fields must be filled." });
         }
 
-        // Check if seller already exists
-        const existingSeller = await sellerModel.findOne({ address });
+        // Check if seller already exists based on contact number
+        const existingSeller = await sellerModel.findOne({ "contactDetails.phone": contactDetails.phone });
         if (existingSeller) {
-            return res.status(400).json({ error: "Seller with this address already exists." });
+            return res.status(400).json({ error: "Seller with this contact number already exists." });
         }
 
         // Create a new seller
-        const seller = await sellerModel.create({ name, address, contact_no });
+        const seller = await sellerModel.create({ name, contactDetails, shippingAddress });
 
         res.status(201).json({
             message: "Seller added successfully",
-            seller: { id: seller._id, name: seller.name, address: seller.address, contact_no: seller.contact_no },
+            seller
         });
-
     } catch (err) {
         console.error("Error adding seller:", err);
         res.status(500).json({ error: "An error occurred while creating the seller." });
+    }
+});
+
+router.get("/sellers", async (req, res) => {
+    try {
+        const sellers = await sellerModel.find();
+        res.status(200).json(sellers);
+    } catch (err) {
+        console.error("Error fetching sellers:", err);
+        res.status(500).json({ error: "An error occurred while retrieving sellers." });
     }
 });
 
