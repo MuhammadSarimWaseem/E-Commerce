@@ -19,10 +19,9 @@ import cartStore from "../../Store/cartStore";
 import Axios from "axios";
 import authStore from "../../Store/authStore";
 import permissionStore from "../../Store/permission";
-
+import Cookies from "js-cookie";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/material.css";
-
 
 function Cart() {
     const cartValue = cartStore((state) => state.cartValue) || [];
@@ -70,7 +69,7 @@ function Cart() {
     }, [navigate, setValue, setPermissionValue]);
 
     useEffect(() => {
-        const total = cartValue.reduce((acc, item) => acc + (item.wholesalePrice || 0), 0);
+        const total = cartValue.reduce((acc, item) => acc + (item.wholesalePrice || 0) * (item.quantity || 1), 0);
         setTotalAmount(total);
     }, [cartValue]);
 
@@ -78,6 +77,16 @@ function Cart() {
         const newCart = cartValue.filter((_, i) => i !== index);
         setCartValue(newCart);
         toast.info("Item removed from cart", { theme: "dark" });
+    };
+
+    const updateQuantity = (index, newQuantity) => {
+        if (newQuantity < 1) return; // Prevent negative quantity
+
+        const updatedCart = cartValue.map((item, i) =>
+            i === index ? { ...item, quantity: newQuantity } : item
+        );
+
+        setCartValue([...updatedCart]);
     };
 
     const handleOrder = async () => {
@@ -93,6 +102,12 @@ function Cart() {
         }
 
         try {
+            const token = Cookies.get("token");
+            if (!token) {
+                toast.error("Authentication error! Please log in again.", { theme: "dark" });
+                return;
+            }
+
             const response = await Axios.post(
                 `${import.meta.env.VITE_BASE_URL}/order`,
                 { cart: cartValue, shippingDetails },
@@ -100,6 +115,7 @@ function Cart() {
                     withCredentials: true,
                     headers: {
                         "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
                     },
                 }
             );
@@ -140,7 +156,17 @@ function Cart() {
                                 <CardContent sx={{ flexGrow: 1 }}>
                                     <Typography variant="h6" sx={{ fontWeight: "bold" }}>{item.title}</Typography>
                                     <Typography variant="body1" color="text.secondary">Price: ${item.price.toFixed(2)}</Typography>
-                                    <Typography variant="body1" color="text.secondary">wholesalePrice: ${item.wholesalePrice.toFixed(2)}</Typography>
+                                    <Typography variant="body1" color="text.secondary">Wholesale Price: ${item.wholesalePrice.toFixed(2)}</Typography>
+                                    {/* Quantity Update Field */}
+                                    <TextField
+                                        type="number"
+                                        label="Quantity"
+                                        variant="outlined"
+                                        size="small"
+                                        value={item.quantity || 1}
+                                        onChange={(e) => updateQuantity(index, parseInt(e.target.value, 10))}
+                                        sx={{ mt: 1, width: 80 }}
+                                    />
                                 </CardContent>
                                 <IconButton color="error" onClick={() => handleDelete(index)}>
                                     <DeleteIcon />
