@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Axios from "axios";
 import {
     Container, Table, TableBody, TableCell, TableHead, TableRow, Paper, Typography,
-    MenuItem, Select, List, ListItem,Divider
+    MenuItem, Select, List, ListItem, Divider
 } from "@mui/material";
 import { toast } from "react-toastify";
 import authStore from "../../Store/authStore";
@@ -74,13 +74,16 @@ function ViewOrder() {
                 {userRole === "admin" ? "Manage Orders (Admin)" : "View Orders (Seller)"}
             </Typography>
             <Paper sx={{ p: 2, overflowX: "auto", borderRadius: 2 }}>
-                <Table sx={{ minWidth: 650 }}>
+                <Table sx={{ minWidth: 750 }}>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                             <TableCell><b>Customer</b></TableCell>
                             <TableCell><b>Contact</b></TableCell>
                             <TableCell><b>Shipping Address</b></TableCell>
                             <TableCell><b>Products</b></TableCell>
+                            {userRole === "admin" &&
+                            <TableCell><b>Profit</b></TableCell>
+                            }
                             <TableCell><b>Order Status</b></TableCell>
                         </TableRow>
                     </TableHead>
@@ -89,17 +92,11 @@ function ViewOrder() {
                             <TableRow key={order._id} hover>
                                 <TableCell>{order.customerName}</TableCell>
 
-                                {/* ✅ Improved Contact Details Display */}
                                 <TableCell>
-                                    <Typography variant="body2">
-                                        📞 {order.contactDetails?.phone || "N/A"}
-                                    </Typography>
-                                    <Typography variant="body2" color="textSecondary">
-                                        ✉️ {order.contactDetails?.email || "N/A"}
-                                    </Typography>
+                                    <Typography variant="body2">📞 {order.contactDetails?.phone || "N/A"}</Typography>
+                                    <Typography variant="body2" color="textSecondary">✉️ {order.contactDetails?.email || "N/A"}</Typography>
                                 </TableCell>
 
-                                {/* ✅ Improved Address Formatting */}
                                 <TableCell>
                                     <Typography variant="body2">
                                         {order.shippingAddress
@@ -108,7 +105,6 @@ function ViewOrder() {
                                     </Typography>
                                 </TableCell>
 
-                                {/* ✅ Improved Product Display */}
                                 <TableCell>
                                     <List dense>
                                         {order.products.map((item, index) => (
@@ -117,17 +113,30 @@ function ViewOrder() {
                                                     <Typography variant="body2">
                                                         • {item.product?.title || "Unnamed Product"} (x{item.quantity})
                                                     </Typography>
-                                                    <Typography variant="body2" fontWeight="bold">
-                                                        ${item.profit || 0} each | <span style={{ color: "#4caf50" }}>Total: ${item.quantity * (item.profit || 0)}</span>
-                                                    </Typography>
                                                 </ListItem>
                                                 {index < order.products.length - 1 && <Divider />}
                                             </React.Fragment>
                                         ))}
                                     </List>
                                 </TableCell>
+                                {userRole === "admin" &&
 
-                                {/* ✅ Better Order Status Dropdown */}
+                                    <TableCell>
+                                        <List dense>
+                                            {order.products.map((item, index) => (
+                                                <React.Fragment key={index}>
+                                                    <ListItem sx={{ display: "flex", justifyContent: "space-between" }}>
+                                                        <Typography variant="body2" fontWeight="bold">
+                                                            ${item.profit || 0} each | <span style={{ color: "#4caf50" }}>Total: ${item.quantity * (item.profit || 0)}</span>
+                                                        </Typography>
+                                                    </ListItem>
+                                                    {index < order.products.length - 1 && <Divider />}
+                                                </React.Fragment>
+                                            ))}
+                                        </List>
+                                    </TableCell>
+                                }
+
                                 <TableCell>
                                     <Select
                                         value={order.orderStatus || "Pending"}
