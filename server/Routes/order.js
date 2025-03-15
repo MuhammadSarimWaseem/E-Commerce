@@ -1,8 +1,8 @@
 const express = require("express");
-const jwt = require("jsonwebtoken"); 
+const jwt = require("jsonwebtoken");
 const userModel = require("../Model/user");
 const productModel = require("../Model/product");
-const orderModel = require("../Model/order");  
+const orderModel = require("../Model/order");
 const cookieParser = require("cookie-parser");
 
 const router = express.Router();
@@ -15,11 +15,12 @@ router.post("/order", isloggedIn, async (req, res) => {
         console.log("Request Body:", req.body); // Debugging
 
         // Validate shipping details
-        if (!req.body.shippingDetails || 
-            !req.body.shippingDetails.customerName || 
-            !req.body.shippingDetails.contactDetails || 
-            !req.body.shippingDetails.shippingAddress) {
-            return res.status(400).send({ error: "Shipping details are required!" });
+        const { customerName, contactDetails, shippingAddress } = req.body.shippingDetails || {};
+        
+        if (!customerName || !contactDetails || !contactDetails.phone || !shippingAddress ||
+            !shippingAddress.street1 || !shippingAddress.city || 
+            !shippingAddress.country || !shippingAddress.zipCode) {
+            return res.status(400).send({ error: "All required shipping details must be provided!" });
         }
 
         // Fetch User
@@ -52,9 +53,18 @@ router.post("/order", isloggedIn, async (req, res) => {
         let order = await orderModel.create({
             user: user._id,
             products: orderItems,
-            customerName: req.body.shippingDetails.customerName,
-            contactDetails: req.body.shippingDetails.contactDetails,
-            shippingAddress: req.body.shippingDetails.shippingAddress
+            customerName,
+            contactDetails: {
+                phone: contactDetails.phone,
+                email: contactDetails.email || null // Optional field
+            },
+            shippingAddress: {
+                street1: shippingAddress.street1,
+                street2: shippingAddress.street2 || null, // Optional field
+                city: shippingAddress.city,
+                country: shippingAddress.country,
+                zipCode: shippingAddress.zipCode
+            }
         });
 
         res.status(201).send({ message: "Order placed successfully!", order });
@@ -64,6 +74,7 @@ router.post("/order", isloggedIn, async (req, res) => {
     }
 });
 
+// Middleware to check if the user is logged in
 function isloggedIn(req, res, next) {
     try {
         if (!req.cookies.token) {

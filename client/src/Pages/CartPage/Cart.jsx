@@ -20,6 +20,10 @@ import Axios from "axios";
 import authStore from "../../Store/authStore";
 import permissionStore from "../../Store/permission";
 
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/material.css";
+
+
 function Cart() {
     const cartValue = cartStore((state) => state.cartValue) || [];
     const setCartValue = cartStore((state) => state.setCartValue);
@@ -31,8 +35,17 @@ function Cart() {
 
     const [shippingDetails, setShippingDetails] = useState({
         customerName: "",
-        contactDetails: "",
-        shippingAddress: "",
+        contactDetails: {
+            phone: "",
+            email: ""
+        },
+        shippingAddress: {
+            street1: "",
+            street2: "",
+            city: "",
+            country: "",
+            zipCode: ""
+        }
     });
 
     useEffect(() => {
@@ -57,7 +70,7 @@ function Cart() {
     }, [navigate, setValue, setPermissionValue]);
 
     useEffect(() => {
-        const total = cartValue.reduce((acc, item) => acc + (item.price || 0), 0);
+        const total = cartValue.reduce((acc, item) => acc + (item.wholesalePrice || 0), 0);
         setTotalAmount(total);
     }, [cartValue]);
 
@@ -73,14 +86,16 @@ function Cart() {
             return;
         }
 
-        if (!shippingDetails.customerName || !shippingDetails.contactDetails || !shippingDetails.shippingAddress) {
-            toast.warn("Please fill in all shipping details!", { theme: "dark" });
+        const { customerName, contactDetails, shippingAddress } = shippingDetails;
+        if (!customerName || !contactDetails.phone || !shippingAddress.street1 || !shippingAddress.city || !shippingAddress.country || !shippingAddress.zipCode) {
+            toast.warn("Please fill in all required shipping details!", { theme: "dark" });
             return;
         }
 
         try {
             const response = await Axios.post(
-                `${import.meta.env.VITE_BASE_URL}/order`,{ cart: cartValue, shippingDetails },
+                `${import.meta.env.VITE_BASE_URL}/order`,
+                { cart: cartValue, shippingDetails },
                 {
                     withCredentials: true,
                     headers: {
@@ -91,7 +106,11 @@ function Cart() {
 
             if (response.status === 201) {
                 setCartValue([]);
-                setShippingDetails({ customerName: "", contactDetails: "", shippingAddress: "" });
+                setShippingDetails({
+                    customerName: "",
+                    contactDetails: { phone: "", email: "" },
+                    shippingAddress: { street1: "", street2: "", city: "", country: "", zipCode: "" }
+                });
                 toast.success("Order placed successfully!", { theme: "dark" });
             } else {
                 throw new Error("Unexpected response status");
@@ -114,7 +133,6 @@ function Cart() {
                 </Typography>
             ) : (
                 <Grid container spacing={3}>
-                    {/* Left Side: Cart Items */}
                     <Grid item xs={12} md={7}>
                         {cartValue.map((item, index) => (
                             <Card key={index} sx={{ display: "flex", alignItems: "center", p: 2, boxShadow: 3, mb: 2 }}>
@@ -122,9 +140,7 @@ function Cart() {
                                 <CardContent sx={{ flexGrow: 1 }}>
                                     <Typography variant="h6" sx={{ fontWeight: "bold" }}>{item.title}</Typography>
                                     <Typography variant="body1" color="text.secondary">Price: ${item.price.toFixed(2)}</Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Wholesale Price: ${item.wholesalePrice?.toFixed(2)}
-                                    </Typography>
+                                    <Typography variant="body1" color="text.secondary">wholesalePrice: ${item.wholesalePrice.toFixed(2)}</Typography>
                                 </CardContent>
                                 <IconButton color="error" onClick={() => handleDelete(index)}>
                                     <DeleteIcon />
@@ -133,63 +149,75 @@ function Cart() {
                         ))}
                     </Grid>
 
-                    {/* Right Side: Shipping Form & Summary */}
                     <Grid item xs={12} md={5}>
                         <Card sx={{ p: 3, boxShadow: 3 }}>
-                            <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                Shipping Details
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                label="Customer Name"
-                                variant="outlined"
-                                margin="normal"
+                            <Typography variant="h6" fontWeight="bold" gutterBottom>Shipping Details</Typography>
+                            <TextField fullWidth label="Name" variant="outlined" margin="normal"
                                 value={shippingDetails.customerName}
                                 onChange={(e) => setShippingDetails({ ...shippingDetails, customerName: e.target.value })}
                             />
-                            <TextField
-                                fullWidth
-                                label="Contact Details"
-                                variant="outlined"
-                                margin="normal"
-                                value={shippingDetails.contactDetails}
-                                onChange={(e) => setShippingDetails({ ...shippingDetails, contactDetails: e.target.value })}
+                            <PhoneInput
+                                country={"us"} // Default country
+                                enableSearch={true} // Allows users to search for country codes
+                                value={shippingDetails.contactDetails.phone}
+                                onChange={(phone) =>
+                                    setShippingDetails({
+                                        ...shippingDetails,
+                                        contactDetails: { ...shippingDetails.contactDetails, phone },
+                                    })
+                                }
+                                inputStyle={{
+                                    width: "100%",
+                                    height: "56px",
+                                    borderRadius: "4px",
+                                    border: "1px solid #ccc",
+                                    paddingLeft: "50px",
+                                }}
                             />
-                            <TextField
-                                fullWidth
-                                label="Shipping Address"
-                                variant="outlined"
-                                margin="normal"
-                                multiline
-                                rows={3}
-                                value={shippingDetails.shippingAddress}
-                                onChange={(e) => setShippingDetails({ ...shippingDetails, shippingAddress: e.target.value })}
+
+                            <TextField fullWidth label="Email (Optional)" variant="outlined" margin="normal"
+                                value={shippingDetails.contactDetails.email}
+                                onChange={(e) => setShippingDetails({ ...shippingDetails, contactDetails: { ...shippingDetails.contactDetails, email: e.target.value } })}
+                            />
+                            <TextField fullWidth label="Street 1" variant="outlined" margin="normal"
+                                value={shippingDetails.shippingAddress.street1}
+                                onChange={(e) => setShippingDetails({ ...shippingDetails, shippingAddress: { ...shippingDetails.shippingAddress, street1: e.target.value } })}
+                            />
+                            <TextField fullWidth label="Street 2 (Optional)" variant="outlined" margin="normal"
+                                value={shippingDetails.shippingAddress.street2}
+                                onChange={(e) => setShippingDetails({ ...shippingDetails, shippingAddress: { ...shippingDetails.shippingAddress, street2: e.target.value } })}
+                            />
+                            <TextField fullWidth label="City" variant="outlined" margin="normal"
+                                value={shippingDetails.shippingAddress.city}
+                                onChange={(e) => setShippingDetails({ ...shippingDetails, shippingAddress: { ...shippingDetails.shippingAddress, city: e.target.value } })}
+                            />
+                            <TextField fullWidth label="Country" variant="outlined" margin="normal"
+                                value={shippingDetails.shippingAddress.country}
+                                onChange={(e) => setShippingDetails({ ...shippingDetails, shippingAddress: { ...shippingDetails.shippingAddress, country: e.target.value } })}
+                            />
+                            <TextField fullWidth label="Zip Code" variant="outlined" margin="normal"
+                                value={shippingDetails.shippingAddress.zipCode}
+                                onChange={(e) => setShippingDetails({ ...shippingDetails, shippingAddress: { ...shippingDetails.shippingAddress, zipCode: e.target.value } })}
                             />
                         </Card>
 
-                        {/* Order Summary */}
-                        <Card sx={{ mt: 3, p: 3, boxShadow: 3 }}>
-                            <Typography variant="h6" align="center" sx={{ fontWeight: "bold" }}>
-                                Total Amount: ${totalAmount.toFixed(2)}
-                            </Typography>
-                            <Box display="flex" justifyContent="center" mt={3} gap={2}>
-                                <Button
-                                    variant="contained"
-                                    sx={{ background: "#0072ff", color: "#fff", fontWeight: "bold", px: 4 }}
-                                    onClick={() => navigate("/landing")}
-                                >
-                                    Products
-                                </Button>
-                                <Button
-                                    onClick={handleOrder}
-                                    variant="contained"
-                                    sx={{ background: "#ff4b2b", color: "#fff", fontWeight: "bold", px: 4 }}
-                                    disabled={cartValue.length === 0}
-                                >
-                                    Order
-                                </Button>
+                        {/* Total Pricing Section */}
+                        <Card sx={{ p: 3, mt: 3, boxShadow: 3 }}>
+                            <Typography variant="h6" fontWeight="bold">Order Summary</Typography>
+                            <Box display="flex" justifyContent="space-between" mt={2}>
+                                <Typography variant="body1">Subtotal:</Typography>
+                                <Typography variant="body1">${totalAmount.toFixed(2)}</Typography>
+                            </Box>
+                            <Box display="flex" justifyContent="space-between" mt={1}>
+                                <Typography variant="body1">Shipping Fee:</Typography>
+                                <Typography variant="body1">${totalAmount > 50 ? "Free" : "5.00"}</Typography>
+                            </Box>
+                            <Box display="flex" justifyContent="space-between" mt={1} fontWeight="bold">
+                                <Typography variant="body1">Total:</Typography>
+                                <Typography variant="body1">${(totalAmount > 50 ? totalAmount : totalAmount + 5).toFixed(2)}</Typography>
                             </Box>
                         </Card>
+                        <Button onClick={handleOrder} variant="contained" color="primary" fullWidth sx={{ mt: 3 }}>Order</Button>
                     </Grid>
                 </Grid>
             )}

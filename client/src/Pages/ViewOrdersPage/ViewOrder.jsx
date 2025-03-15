@@ -12,15 +12,13 @@ function ViewOrder() {
     const [userRole, setUserRole] = useState(null);
     const setValue = authStore((state) => state.setValue);
 
-    // ✅ Fetch User Role
     useEffect(() => {
         const fetchUserRole = async () => {
             try {
                 const authResponse = await Axios.get(`${import.meta.env.VITE_BASE_URL}/landing`, { withCredentials: true });
                 setValue(true);
                 const { data } = await Axios.get(`${import.meta.env.VITE_BASE_URL}/userRole`, { withCredentials: true });
-                setUserRole(data.role); 
-                console.log("User Role:", data.role);
+                setUserRole(data.role);
             } catch (error) {
                 console.error("Error fetching user role:", error);
                 toast.error("Failed to fetch user role");
@@ -31,12 +29,9 @@ function ViewOrder() {
         fetchUserRole();
     }, []);
 
-    // ✅ Set API URL Dynamically
-    
-    // ✅ Fetch Orders After `userRole` is Available
     useEffect(() => {
-        if (!userRole) return; 
-        
+        if (!userRole) return;
+
         const fetchOrders = async () => {
             try {
                 const API_URL = userRole === "admin" ? "/adminOrders" : "/sellerOrders";
@@ -52,7 +47,7 @@ function ViewOrder() {
     }, [userRole]);
 
     const handleStatusChange = async (orderId, newStatus) => {
-        if (userRole !== "admin") return; 
+        if (userRole !== "admin") return;
 
         setOrders(prevOrders =>
             prevOrders.map(order =>
@@ -93,15 +88,26 @@ function ViewOrder() {
                         {orders.map(order => (
                             <TableRow key={order._id}>
                                 <TableCell>{order.customerName}</TableCell>
-                                <TableCell>{order.contactDetails}</TableCell>
-                                <TableCell>{order.shippingAddress}</TableCell>
-                                
-                                {/* ✅ Display Products Correctly */}
+
+                                {/* ✅ Fixing Contact Details */}
+                                <TableCell>
+                                    {order.contactDetails?.phone || "N/A"} <br />
+                                    {order.contactDetails?.email || "N/A"}
+                                </TableCell>
+
+                                {/* ✅ Fixing Shipping Address */}
+                                <TableCell>
+                                    {order.shippingAddress
+                                        ? `${order.shippingAddress.street1}, ${order.shippingAddress.city}, ${order.shippingAddress.country} - ${order.shippingAddress.zipCode}`
+                                        : "Address not available"}
+                                </TableCell>
+
+                                {/* ✅ Displaying Products */}
                                 <TableCell>
                                     <List dense>
                                         {order.products.map((item, index) => (
                                             <ListItem key={index} sx={{ p: 0 }}>
-                                                • {item.product.title || "Unnamed Product"} (x{item.quantity})
+                                                • {item.product?.title || "Unnamed Product"} (x{item.quantity})
                                             </ListItem>
                                         ))}
                                     </List>
@@ -110,7 +116,7 @@ function ViewOrder() {
                                 {/* ✅ Order Status Dropdown */}
                                 <TableCell>
                                     <Select
-                                        value={order.orderStatus || "Pending"}  // Default to "Pending"
+                                        value={order.orderStatus || "Pending"}
                                         onChange={(e) => handleStatusChange(order._id, e.target.value)}
                                         disabled={userRole !== "admin"}
                                         sx={{ minWidth: "120px" }}
