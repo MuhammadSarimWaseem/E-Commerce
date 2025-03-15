@@ -5,15 +5,37 @@ import { toast } from "react-toastify";
 import { Container, TextField, Button, Paper, Typography, Grid } from "@mui/material";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/material.css";
+import { useEffect } from "react";
+import authStore from "../../Store/authStore";
 
 function AddSeller() {
     const navigate = useNavigate();
+    const setValue = authStore((state) => state.setValue);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [input, setInput] = useState({
         name: "",
         contactDetails: { phone: "", email: "" },
         shippingAddress: { street1: "", street2: "", city: "", country: "", zipCode: "" },
     });
+
+    useEffect(() => {
+        const authenticateUser = async () => {
+            try {
+                const [authResponse] = await Promise.all([
+                    Axios.get(`${import.meta.env.VITE_BASE_URL}/landing`, { withCredentials: true }),
+                ]);
+
+                if (!authResponse.data.user) throw new Error("Unauthorized");
+
+                setValue(true);
+            } catch (error) {
+                setValue(false);
+                navigate("/login");
+            }
+        };
+
+        authenticateUser();
+    }, [navigate, setValue]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -63,24 +85,24 @@ function AddSeller() {
                     <TextField label="Name" name="name" value={input.name} onChange={handleInputChange} fullWidth required margin="normal" />
 
                     <PhoneInput
-                                country={"us"} // Default country
-                                enableSearch={true} // Allows users to search for country codes
-                                value={input.contactDetails.phone}
-                                onChange={(phone) =>
-                                    setInput((prev) => ({
-                                        ...prev,
-                                        contactDetails: { ...prev.contactDetails, phone },
-                                    }))
-                                }
-                                
-                                inputStyle={{
-                                    width: "100%",
-                                    height: "56px",
-                                    borderRadius: "4px",
-                                    border: "1px solid #ccc",
-                                    paddingLeft: "50px",
-                                }}
-                            />
+                        country={"us"} // Default country
+                        enableSearch={true} // Allows users to search for country codes
+                        value={input.contactDetails.phone}
+                        onChange={(phone) =>
+                            setInput((prev) => ({
+                                ...prev,
+                                contactDetails: { ...prev.contactDetails, phone },
+                            }))
+                        }
+
+                        inputStyle={{
+                            width: "100%",
+                            height: "56px",
+                            borderRadius: "4px",
+                            border: "1px solid #ccc",
+                            paddingLeft: "50px",
+                        }}
+                    />
                     <TextField label="Email" name="contactDetails.email" value={input.contactDetails.email} onChange={handleInputChange} fullWidth margin="normal" />
 
                     <TextField label="Street 1" name="shippingAddress.street1" value={input.shippingAddress.street1} onChange={handleInputChange} fullWidth required margin="normal" />
