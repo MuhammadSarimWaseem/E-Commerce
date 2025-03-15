@@ -108,9 +108,14 @@ function Cart() {
                 return;
             }
 
+            const cartWithProfit = cartValue.map(item => ({
+                ...item,
+                profit: item.price - item.wholesalePrice
+            }));
+
             const response = await Axios.post(
                 `${import.meta.env.VITE_BASE_URL}/order`,
-                { cart: cartValue, shippingDetails },
+                { cart: cartWithProfit, shippingDetails },
                 {
                     withCredentials: true,
                     headers: {

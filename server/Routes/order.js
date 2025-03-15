@@ -45,7 +45,8 @@ router.post("/order", isloggedIn, async (req, res) => {
             let product = products.find(p => p._id.toString() === item._id);
             return {
                 product: product._id,
-                quantity: item.quantity || 1
+                quantity: item.quantity || 1,
+                profit: item.profit // Include profit information
             };
         });
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Axios from "axios";
 import {
     Container, Table, TableBody, TableCell, TableHead, TableRow, Paper, Typography,
-    MenuItem, Select, List, ListItem
+    MenuItem, Select, List, ListItem,Divider
 } from "@mui/material";
 import { toast } from "react-toastify";
 import authStore from "../../Store/authStore";
@@ -73,10 +73,10 @@ function ViewOrder() {
             <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
                 {userRole === "admin" ? "Manage Orders (Admin)" : "View Orders (Seller)"}
             </Typography>
-            <Paper sx={{ p: 2, overflowX: "auto" }}>
-                <Table>
+            <Paper sx={{ p: 2, overflowX: "auto", borderRadius: 2 }}>
+                <Table sx={{ minWidth: 650 }}>
                     <TableHead>
-                        <TableRow>
+                        <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                             <TableCell><b>Customer</b></TableCell>
                             <TableCell><b>Contact</b></TableCell>
                             <TableCell><b>Shipping Address</b></TableCell>
@@ -86,40 +86,60 @@ function ViewOrder() {
                     </TableHead>
                     <TableBody>
                         {orders.map(order => (
-                            <TableRow key={order._id}>
+                            <TableRow key={order._id} hover>
                                 <TableCell>{order.customerName}</TableCell>
 
-                                {/* ✅ Fixing Contact Details */}
+                                {/* ✅ Improved Contact Details Display */}
                                 <TableCell>
-                                    {order.contactDetails?.phone || "N/A"} <br />
-                                    {order.contactDetails?.email || "N/A"}
+                                    <Typography variant="body2">
+                                        📞 {order.contactDetails?.phone || "N/A"}
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary">
+                                        ✉️ {order.contactDetails?.email || "N/A"}
+                                    </Typography>
                                 </TableCell>
 
-                                {/* ✅ Fixing Shipping Address */}
+                                {/* ✅ Improved Address Formatting */}
                                 <TableCell>
-                                    {order.shippingAddress
-                                        ? `${order.shippingAddress.street1}, ${order.shippingAddress.city}, ${order.shippingAddress.country} - ${order.shippingAddress.zipCode}`
-                                        : "Address not available"}
+                                    <Typography variant="body2">
+                                        {order.shippingAddress
+                                            ? `${order.shippingAddress.street1}, ${order.shippingAddress.city}, ${order.shippingAddress.country} - ${order.shippingAddress.zipCode}`
+                                            : "Address not available"}
+                                    </Typography>
                                 </TableCell>
 
-                                {/* ✅ Displaying Products */}
+                                {/* ✅ Improved Product Display */}
                                 <TableCell>
                                     <List dense>
                                         {order.products.map((item, index) => (
-                                            <ListItem key={index} sx={{ p: 0 }}>
-                                                • {item.product?.title || "Unnamed Product"} (x{item.quantity})
-                                            </ListItem>
+                                            <React.Fragment key={index}>
+                                                <ListItem sx={{ display: "flex", justifyContent: "space-between" }}>
+                                                    <Typography variant="body2">
+                                                        • {item.product?.title || "Unnamed Product"} (x{item.quantity})
+                                                    </Typography>
+                                                    <Typography variant="body2" fontWeight="bold">
+                                                        ${item.profit || 0} each | <span style={{ color: "#4caf50" }}>Total: ${item.quantity * (item.profit || 0)}</span>
+                                                    </Typography>
+                                                </ListItem>
+                                                {index < order.products.length - 1 && <Divider />}
+                                            </React.Fragment>
                                         ))}
                                     </List>
                                 </TableCell>
 
-                                {/* ✅ Order Status Dropdown */}
+                                {/* ✅ Better Order Status Dropdown */}
                                 <TableCell>
                                     <Select
                                         value={order.orderStatus || "Pending"}
                                         onChange={(e) => handleStatusChange(order._id, e.target.value)}
                                         disabled={userRole !== "admin"}
-                                        sx={{ minWidth: "120px" }}
+                                        fullWidth
+                                        sx={{
+                                            minWidth: "120px",
+                                            fontSize: "14px",
+                                            backgroundColor: "#f5f5f5",
+                                            borderRadius: "8px"
+                                        }}
                                     >
                                         <MenuItem value="Pending">Pending</MenuItem>
                                         <MenuItem value="Processing">Processing</MenuItem>
