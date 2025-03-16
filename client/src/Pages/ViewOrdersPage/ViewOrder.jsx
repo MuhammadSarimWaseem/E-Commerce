@@ -187,8 +187,24 @@ function ViewOrder() {
                                     <TableCell>${order.products.reduce((acc, p) => acc + (p.quantity * (p.profit || 0)), 0)}</TableCell>
                                 }
                                 <TableCell>
-                                    <Typography>{order.orderStatus}</Typography>
+                                    {userRole === "admin" ? (
+                                        <FormControl size="small" sx={{ minWidth: 120 }}>
+                                            <Select
+                                                value={order.orderStatus}
+                                                onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                                            >
+                                                <MenuItem value="Pending">Pending</MenuItem>
+                                                <MenuItem value="Processing">Processing</MenuItem>
+                                                <MenuItem value="Shipped">Shipped</MenuItem>
+                                                <MenuItem value="Delivered">Delivered</MenuItem>
+                                                <MenuItem value="Cancelled">Cancelled</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    ) : (
+                                        <Typography>{order.orderStatus}</Typography>
+                                    )}
                                 </TableCell>
+
                             </TableRow>
                         ))}
                     </TableBody>
