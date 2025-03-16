@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Axios from "axios";
 import {
     Container, Table, TableBody, TableCell, TableHead, TableRow, Paper, Typography,
-    MenuItem, Select, List, ListItem, Divider, Button
+    MenuItem, Select, List, ListItem, Divider, Button, FormControl, InputLabel
 } from "@mui/material";
 import { toast } from "react-toastify";
 import authStore from "../../Store/authStore";
@@ -12,6 +12,7 @@ import { saveAs } from "file-saver";
 function ViewOrder() {
     const [orders, setOrders] = useState([]);
     const [userRole, setUserRole] = useState(null);
+    const [filterStatus, setFilterStatus] = useState(""); // New filter state
     const setValue = authStore((state) => state.setValue);
 
     useEffect(() => {
@@ -70,7 +71,6 @@ function ViewOrder() {
         }
     };
 
-    // Function to export orders as an Excel file
     const exportToExcel = () => {
         if (orders.length === 0) {
             toast.warn("No orders to export.");
@@ -102,11 +102,33 @@ function ViewOrder() {
         toast.success("Orders exported successfully!");
     };
 
+    // Filter orders based on selected status
+    const filteredOrders = filterStatus
+        ? orders.filter(order => order.orderStatus === filterStatus)
+        : orders;
+
     return (
         <Container>
             <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
                 {userRole === "admin" ? "Manage Orders (Admin)" : "View Orders (Seller)"}
             </Typography>
+
+            {/* Filter Dropdown */}
+            <FormControl sx={{ minWidth: 200, mb: 2 }}>
+                <InputLabel>Filter by Status</InputLabel>
+                <Select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    displayEmpty
+                >
+                    <MenuItem value="">All</MenuItem>
+                    <MenuItem value="Pending">Pending</MenuItem>
+                    <MenuItem value="Processing">Processing</MenuItem>
+                    <MenuItem value="Shipped">Shipped</MenuItem>
+                    <MenuItem value="Delivered">Delivered</MenuItem>
+                    <MenuItem value="Cancelled">Cancelled</MenuItem>
+                </Select>
+            </FormControl>
 
             {/* Export Orders Button */}
             {userRole === "admin" &&
@@ -114,7 +136,7 @@ function ViewOrder() {
                     variant="contained"
                     color="primary"
                     onClick={exportToExcel}
-                    sx={{ mb: 2 }}
+                    sx={{ mb: 2, ml: 2 }}
                 >
                     Download Orders (Excel)
                 </Button>
@@ -128,14 +150,12 @@ function ViewOrder() {
                             <TableCell><b>Contact</b></TableCell>
                             <TableCell><b>Shipping Address</b></TableCell>
                             <TableCell><b>Products</b></TableCell>
-                            {userRole === "admin" &&
-                                <TableCell><b>Profit</b></TableCell>
-                            }
+                            {userRole === "admin" && <TableCell><b>Profit</b></TableCell>}
                             <TableCell><b>Order Status</b></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {orders.map(order => (
+                        {filteredOrders.map(order => (
                             <TableRow key={order._id} hover>
                                 <TableCell>{order.customerName}</TableCell>
                                 <TableCell>
@@ -153,9 +173,9 @@ function ViewOrder() {
                                     <List dense>
                                         {order.products.map((item, index) => (
                                             <React.Fragment key={index}>
-                                                <ListItem sx={{ display: "flex", justifyContent: "space-between" }}>
+                                                <ListItem>
                                                     <Typography variant="body2">
-                                                        • {item.product?.title || "Unnamed Product"} (x{item.quantity})
+                                                        • {item.product?.title || "Unnamed"} (x{item.quantity})
                                                     </Typography>
                                                 </ListItem>
                                                 {index < order.products.length - 1 && <Divider />}
@@ -164,25 +184,10 @@ function ViewOrder() {
                                     </List>
                                 </TableCell>
                                 {userRole === "admin" &&
-                                    <TableCell>
-                                        <Typography variant="body2" fontWeight="bold">
-                                            ${order.products.reduce((acc, p) => acc + (p.quantity * (p.profit || 0)), 0)}
-                                        </Typography>
-                                    </TableCell>
+                                    <TableCell>${order.products.reduce((acc, p) => acc + (p.quantity * (p.profit || 0)), 0)}</TableCell>
                                 }
                                 <TableCell>
-                                    <Select
-                                        value={order.orderStatus || "Pending"}
-                                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                                        disabled={userRole !== "admin"}
-                                        fullWidth
-                                    >
-                                        <MenuItem value="Pending">Pending</MenuItem>
-                                        <MenuItem value="Processing">Processing</MenuItem>
-                                        <MenuItem value="Shipped">Shipped</MenuItem>
-                                        <MenuItem value="Delivered">Delivered</MenuItem>
-                                        <MenuItem value="Cancelled">Cancelled</MenuItem>
-                                    </Select>
+                                    <Typography>{order.orderStatus}</Typography>
                                 </TableCell>
                             </TableRow>
                         ))}
