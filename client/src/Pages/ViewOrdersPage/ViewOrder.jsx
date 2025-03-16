@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import Axios from "axios";
 import {
     Container, Table, TableBody, TableCell, TableHead, TableRow, Paper, Typography,
-    MenuItem, Select, List, ListItem, Divider
+    MenuItem, Select, List, ListItem, Divider, Button
 } from "@mui/material";
 import { toast } from "react-toastify";
 import authStore from "../../Store/authStore";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 function ViewOrder() {
     const [orders, setOrders] = useState([]);
@@ -68,11 +70,56 @@ function ViewOrder() {
         }
     };
 
+    // Function to export orders as an Excel file
+    const exportToExcel = () => {
+        if (orders.length === 0) {
+            toast.warn("No orders to export.");
+            return;
+        }
+
+        const formattedOrders = orders.map(order => ({
+            "Customer Name": order.customerName,
+            "Phone": order.contactDetails?.phone || "N/A",
+            "Email": order.contactDetails?.email || "N/A",
+            "Shipping Address": order.shippingAddress
+                ? `${order.shippingAddress.street1}, ${order.shippingAddress.city}, ${order.shippingAddress.country} - ${order.shippingAddress.zipCode}`
+                : "N/A",
+            "Products": order.products.map(p => `${p.product?.title || "Unnamed"} (x${p.quantity})`).join(", "),
+            ...(userRole === "admin" && {
+                "Profit": order.products.map(p => `$${p.profit || 0}`).join(", "),
+                "Total Profit": `$${order.products.reduce((acc, p) => acc + (p.quantity * (p.profit || 0)), 0)}`
+            }),
+            "Order Status": order.orderStatus || "Pending"
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(formattedOrders);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Orders");
+
+        const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+        const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+        saveAs(data, `Orders_${new Date().toISOString().split("T")[0]}.xlsx`);
+        toast.success("Orders exported successfully!");
+    };
+
     return (
         <Container>
             <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
                 {userRole === "admin" ? "Manage Orders (Admin)" : "View Orders (Seller)"}
             </Typography>
+
+            {/* Export Orders Button */}
+            {userRole === "admin" &&
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={exportToExcel}
+                    sx={{ mb: 2 }}
+                >
+                    Download Orders (Excel)
+                </Button>
+            }
+
             <Paper sx={{ p: 2, overflowX: "auto", borderRadius: 2 }}>
                 <Table sx={{ minWidth: 750 }}>
                     <TableHead>
@@ -82,7 +129,7 @@ function ViewOrder() {
                             <TableCell><b>Shipping Address</b></TableCell>
                             <TableCell><b>Products</b></TableCell>
                             {userRole === "admin" &&
-                            <TableCell><b>Profit</b></TableCell>
+                                <TableCell><b>Profit</b></TableCell>
                             }
                             <TableCell><b>Order Status</b></TableCell>
                         </TableRow>
@@ -91,12 +138,10 @@ function ViewOrder() {
                         {orders.map(order => (
                             <TableRow key={order._id} hover>
                                 <TableCell>{order.customerName}</TableCell>
-
                                 <TableCell>
                                     <Typography variant="body2">📞 {order.contactDetails?.phone || "N/A"}</Typography>
                                     <Typography variant="body2" color="textSecondary">✉️ {order.contactDetails?.email || "N/A"}</Typography>
                                 </TableCell>
-
                                 <TableCell>
                                     <Typography variant="body2">
                                         {order.shippingAddress
@@ -104,7 +149,6 @@ function ViewOrder() {
                                             : "Address not available"}
                                     </Typography>
                                 </TableCell>
-
                                 <TableCell>
                                     <List dense>
                                         {order.products.map((item, index) => (
@@ -120,35 +164,18 @@ function ViewOrder() {
                                     </List>
                                 </TableCell>
                                 {userRole === "admin" &&
-
                                     <TableCell>
-                                        <List dense>
-                                            {order.products.map((item, index) => (
-                                                <React.Fragment key={index}>
-                                                    <ListItem sx={{ display: "flex", justifyContent: "space-between" }}>
-                                                        <Typography variant="body2" fontWeight="bold">
-                                                            ${item.profit || 0} each | <span style={{ color: "#4caf50" }}>Total: ${item.quantity * (item.profit || 0)}</span>
-                                                        </Typography>
-                                                    </ListItem>
-                                                    {index < order.products.length - 1 && <Divider />}
-                                                </React.Fragment>
-                                            ))}
-                                        </List>
+                                        <Typography variant="body2" fontWeight="bold">
+                                            ${order.products.reduce((acc, p) => acc + (p.quantity * (p.profit || 0)), 0)}
+                                        </Typography>
                                     </TableCell>
                                 }
-
                                 <TableCell>
                                     <Select
                                         value={order.orderStatus || "Pending"}
                                         onChange={(e) => handleStatusChange(order._id, e.target.value)}
                                         disabled={userRole !== "admin"}
                                         fullWidth
-                                        sx={{
-                                            minWidth: "120px",
-                                            fontSize: "14px",
-                                            backgroundColor: "#f5f5f5",
-                                            borderRadius: "8px"
-                                        }}
                                     >
                                         <MenuItem value="Pending">Pending</MenuItem>
                                         <MenuItem value="Processing">Processing</MenuItem>
