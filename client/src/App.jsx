@@ -34,14 +34,14 @@ function App() {
       <Router>
         <Navbar></Navbar>
         <Routes>
-            <Route path="/*" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/landing" element={<Landing />} />
-            <Route path="/addProducts" element={<AddProducts />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/addSeller" element={<AddSeller />} />
+          <Route path="/*" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/landing" element={<Landing />} />
+          <Route path="/addProducts" element={<AddProducts />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/addSeller" element={<AddSeller />} />
         </Routes>
       </Router>
     </Fragment>
