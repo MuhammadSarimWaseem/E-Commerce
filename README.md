@@ -2,11 +2,7 @@
 
 A modern, scalable multi-role e-commerce platform built with React, Node.js, and MongoDB. This Software as a Service (SaaS) application enables sellers to manage products and orders while administrators oversee platform operations.
 
-**Project Type:** Software as a Service (SaaS)  
-**Total Marks:** 30 (Coding & Idea: 20 | Documentation: 10)  
-**Maximum Group Members:** 4
 
----
 
 ## 📋 Table of Contents
 
